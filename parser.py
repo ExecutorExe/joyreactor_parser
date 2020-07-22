@@ -1,7 +1,5 @@
 import requests as req
-
 from bs4 import BeautifulSoup as bs
-
 import os.path
 import time
 import urllib.parse
@@ -12,24 +10,25 @@ com = {}
 inf = {}
 y = []
 p = []
+sorted_links = []
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-#
-#
-#
-infof = 0
+ratingf = 0  # включение-1 выключение-0 функции сортировки по рейтингу поста
+rating = 30  # все посты выше этого значения будут скачены
+
+infof = 1
 # tag pars function(idn why idi i add it) to turn this function, tag_function value must be 1
 tagf = 0  # функция включения парса тегов файла(хз зачем добавил) чтобы включить значение должно быть равным: 1
 
 d_path = r"E:\parser_data"  # куда сохранять? | dir to save
 
-from_page = 1631  # от какой страницы | например http://joyreactor.cc/user/rukanishu/35  (первую стриницу можно
+from_page = 1640  # от какой страницы | например http://joyreactor.cc/user/rukanishu/35  (первую стриницу можно
 # посмотреть снизу сайта)
 
-till_page = 1630  # до какой | http://joyreactor.cc/user/rukanishu/1
+till_page = 1639  # до какой | http://joyreactor.cc/user/rukanishu/1
 
-website = "http://ar.reactor.cc"  # какой сайт (без оканчания на "/")
+website = "http://anime.reactor.cc"  # какой сайт (без оканчания на "/")
 
 print("website scan/index has started, please wait..."
       "\nсканирование/индексирование сайта началось, пожалуйста подождите...")
@@ -55,10 +54,9 @@ while not from_page == till_page:
 
     # сам парсер
 
-    def parser(soup, tagfunk=0, tagf = 0, infof = 0):
+    def parser(soup, tagf=0, infof=0):
 
-
-        def info(i, ty,file_tag, path):
+        def info(i, ty, file_tag, path):
             for ay in i.select(path):
                 # creating dict with tags
                 file_tag.setdefault(ty, []).append("{}".format(ay.text))
@@ -107,44 +105,40 @@ while not from_page == till_page:
                     if tagf == 1:  # tag parser
                         # block selection
 
-
-                        x = info(i, ty, ".post_top > .taglist > b > a")
+                        x = info(i, ty, file_tag, ".post_top > .taglist > b > a")
                         file_tag = x
                     # дает некоторую информацию о посте
 
-
                     if infof == 1:
                         # рейтинг поста
-                        x = info(i, ty,rating_DMY_hm_postlink, ".ufoot > div > .post_rating > span")
+                        x = info(i, ty, rating_DMY_hm_postlink, ".ufoot > div > .post_rating > span")
                         rating_DMY_hm_postlink = x
                         # дата  день год месяц точное время
 
-                        x = info(i, ty,rating_DMY_hm_postlink ,".ufoot > div > .date > span > span")
+                        x = info(i, ty, rating_DMY_hm_postlink, ".ufoot > div > .date > span > span")
                         rating_DMY_hm_postlink = x
 
                         # ссылка на пост
-                        x = infolist(i, ty, rating_DMY_hm_postlink,"href", ".ufoot > div > .link_wr > a")
+                        x = infolist(i, ty, rating_DMY_hm_postlink, "href", ".ufoot > div > .link_wr > a")
                         rating_DMY_hm_postlink = x
 
                         # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
-                        x = info(i, ty, bestcommenttext_userinfo_avatar_pic,'.post_comment_list > div > div')
+                        x = info(i, ty, bestcommenttext_userinfo_avatar_pic, '.post_comment_list > div > div')
                         bestcommenttext_userinfo_avatar_pic = x
 
-                        x = infolist(i, ty, bestcommenttext_userinfo_avatar_pic, "src", '.post_comment_list > div > div > img')
+                        x = infolist(i, ty, bestcommenttext_userinfo_avatar_pic, "src",
+                                     '.post_comment_list > div > div > img')
                         bestcommenttext_userinfo_avatar_pic = x
 
-
-
-        return data, file_tag,bestcommenttext_userinfo_avatar_pic,rating_DMY_hm_postlink
-
+        return data, file_tag, bestcommenttext_userinfo_avatar_pic, rating_DMY_hm_postlink
 
 
     from_page = from_page - 1  # counter
 
     # включаем парсер функцию
-    x = parser(soup,tagf,infof)
+    x = parser(soup, tagf, infof)
 
-    y, p,c,h = x
+    y, p, c, h = x
     # print(y)
     # создаем базу данных с линками
     links.extend(y)
@@ -152,53 +146,59 @@ while not from_page == till_page:
     tags.update(p)
     com.update(c)
     inf.update(h)
-    #print(len(tags))
-    print("scanning:", website + "/" + str(from_page), "\nэлементов найдено:", len(links))
+    # print(len(tags))
+    print("scanning:", website + "/" + str(from_page), "\nfound elements:", len(links))
 
     # print(tags)
     # b = list(set(b).union(y))
     # print(len(links),links)
-
-# list1 = html.findAll("a", class_="prettyPhotoLink")
-# list1.extend(html.findAll("a", class_="video_gif_source"))
-# list1.extend(html.findAll("a", class_="video_gif_source"))
+# пример применения функции инфо - сортировка по рейтингу
+if ratingf == 1:
+    print("sorting by rating...")
+    for me in links:
+        if float(inf[os.path.basename(me)][0]) >= rating:
+            sorted_links.append(me)
+    links = sorted_links
 if len(links) == 0:
     print("files does not found")
 else:
-    print("Download", len(links), "files?\n(y/n?)")
+    print("Download", len(links), "files?\n([y]/n)?")
     x = input(":")
     if x.lower() == "y":
-        print("download startin...g\nначинаю загрузку...")
+        print("download starting...g\nначинаю загрузку...")
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
         # это данные которые передаются при запросе к link
         # таким образом я обманываю сайт
+
         request = ({
             'Host': 'img10.reactor.cc',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0',
             'Accept': 'image/webp,*/*',
             'Accept-Language': 'en-US,en;q=0.5',
             'Accept-Encoding': 'gzip, deflate',
-            'Referer': 'http://anime.reactor.cc/',
+            'Referer': 'http://joyreactor.cc/',
             'Connection': 'keep-alive',
 
             'Cache-Control': 'max-age=0',
             'Pragma': 'no-cache'
         })
 
+
         #
+        counter = int(len(links))
+
         for Im_link in links:  # итерация хуяция
 
-            print("files left:", len(links) - 1)
+            print("files left:", counter)
+            counter = counter - 1
 
             time.sleep(2)  # don't touch it coz ping need to not overload website or get wrecking ban
             # не трогать задержка нужна что бы не перегружать вэбсайт и не получить ебаный бан от сайта
 
-            img_data = req.get(Im_link, headers=request).content
-
-            with open(d_path + os.sep + os.path.basename(Im_link), 'wb') as handler:
-                handler.write(img_data)
+            with open(d_path + os.sep + os.path.basename(Im_link), 'wb') as handler:  # открываем файл
+                handler.write(req.get(Im_link, headers=request).content)  # делаем запрос на получение файла
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 print("\n\n#===================================#")
@@ -211,4 +211,3 @@ print("#===================================#")
 
 __version__ = "Conda_env_3.7"
 __author__ = "ExE https://github.com/ExecutorExe"
-
