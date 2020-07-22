@@ -20,13 +20,13 @@ p = []
 # tag pars function(idn why idi i add it) to turn this function, tag_function value must be 1
 tag_function = 0  # функция включения парса тегов файла(хз зачем добавил) чтобы включить значение должно быть равным: 1
 
-d_path = r"E:\parser_data"  # куда сохранять? | dir to save
+d_path = r""  # куда сохранять? | dir to save
 
-from_page = 75  # от какой страницы
+from_page = 1  # от какой страницы
 
 till_page = 0  # до какой
 
-website = "http://anime.reactor.cc/tag/Mikasa+Ackerman"  # какой сайт (без оканчания на "/")
+website = "http://reactor.cc"  # какой сайт (без оканчания на "/")
 
 print("website scan/index has started, please wait..."
       "\nсканирование/индексирование сайта началось, пожалуйста подождите...")
