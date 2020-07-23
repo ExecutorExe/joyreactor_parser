@@ -4,37 +4,42 @@ import os.path
 import time
 import urllib.parse
 
+image_counter = 0
 links = []
+data_text = {}
 tags = {}
 com = {}
 inf = {}
 y = []
 p = []
 sorted_links = []
+linksbase = {}
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# SETTINGS | ПАРАМЕТРЫ
 
-
-ratingf = 0  # включение-1 выключение-0 функции сортировки по рейтингу поста
+ratingf = 0  # включение-1 выключение-0 функции сортировки по рейтингу поста infof тоже должна быть включена
 rating = 30  # все посты выше этого значения будут скачены
 
-infof = 1
+infof = 0  # индексирует пачку информации для каждой ссыолки
+
 # tag pars function(idn why idi i add it) to turn this function, tag_function value must be 1
 tagf = 0  # функция включения парса тегов файла(хз зачем добавил) чтобы включить значение должно быть равным: 1
-
+# tagf так же включает парс текста в посте если он емеется 
 d_path = r"E:\parser_data"  # куда сохранять? | dir to save
 
-from_page = 1640  # от какой страницы | например http://joyreactor.cc/user/rukanishu/35  (первую стриницу можно
+from_page = 5724  # от какой страницы | например http://joyreactor.cc/user/rukanishu/35  (первую стриницу можно
 # посмотреть снизу сайта)
 
-till_page = 1639  # до какой | http://joyreactor.cc/user/rukanishu/1
+till_page = 5720  # до какой | http://joyreactor.cc/user/rukanishu/1
 
-website = "http://anime.reactor.cc"  # какой сайт (без оканчания на "/")
+website = "http://joyreactor.cc/discussion/flame"  # какая пейджа  пример http://joyreactor.cc/best(без оканчания на "/"
+# http:// - обязательно
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 
 print("website scan/index has started, please wait..."
       "\nсканирование/индексирование сайта началось, пожалуйста подождите...")
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 #
 while not from_page == till_page:
     # не трогать блэт. сайт может забанить если запросов больше чем определенное значение
@@ -55,32 +60,83 @@ while not from_page == till_page:
     # сам парсер
 
     def parser(soup, tagf=0, infof=0):
-
+        """
         def info(i, ty, file_tag, path):
             for ay in i.select(path):
                 # creating dict with tags
                 file_tag.setdefault(ty, []).append("{}".format(ay.text))
-            return file_tag
+            return file_tag"""
 
-        def infolist(i, ty, file_tag, atr, path):
-            for ay in i.select(path):
-                # creating dict with tags
-                file_tag.setdefault(ty, []).append("{}".format(ay[atr]))
-            return file_tag
+        # def infolist(i, file_tag, atr, path):
+
+        # creating dict with tags
+        # print(ay[atr])
+
+        # return file_tag
 
         atr = ["a", "img"]  # "a" - большие изображения которые надо разворачивать + гифки
         # "img" - мелкие изображения которые слишком малы что бы разворачивать
-        global ty
+        global key, image_counter
         data = []
+
+        datatext = {}
+        dataimage = {}
         rating_DMY_hm_postlink = {}
         bestcommenttext_userinfo_avatar_pic = {}
         index = 0
         file_tag = {}
         # block selection
         for i in soup.select(".article"):
+            # create post number as dict key
+            for ay in i.select(".ufoot > div > .link_wr > a"):
+                key = os.path.basename(ay["href"])
+
+            def info(i, ty, file_tag, path):
+                for ay in i.select(path):
+                    # creating dict with tags
+                    file_tag.setdefault(ty, []).append("{}".format(ay.text))
+                return file_tag
+
+            def infolist(i, ty, file_tag, atr, path):
+                for ay in i.select(path):
+                    # creating dict with tags
+                    file_tag.setdefault(ty, []).append("{}".format(ay[atr]))
+                return file_tag
+
             # print(i)
 
             for i2 in i.select(".post_content "):
+
+                
+                if tagf == 1:
+                    # парс текста в посте если он имеется 
+                    for io in i2.select("div"):
+                        if io.text:
+                            datatext.setdefault(key, []).append("{}".format(io.text))
+                    # tag parser
+                    # block selection
+
+                    x = info(i, key, file_tag, ".post_top > .taglist > b > a")
+                    file_tag = x
+                if infof == 1:
+                    # рейтинг поста
+                    x = info(i, key, rating_DMY_hm_postlink, ".ufoot > div > .post_rating > span")
+                    rating_DMY_hm_postlink = x
+                    # дата  день год месяц точное время
+
+                    x = info(i, key, rating_DMY_hm_postlink, ".ufoot > div > .date > span > span")
+                    rating_DMY_hm_postlink = x
+
+                    # ссылка на пост
+
+                    # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
+                    x = info(i, key, bestcommenttext_userinfo_avatar_pic, '.post_comment_list > div > div')
+                    bestcommenttext_userinfo_avatar_pic = x
+
+                    x = infolist(i, key, bestcommenttext_userinfo_avatar_pic, "src",
+                                 '.post_comment_list > div > div > img')
+                    bestcommenttext_userinfo_avatar_pic = x
+
                 # print(i2)
                 for i3 in i2.select(".image "):
                     # print(i3)
@@ -90,47 +146,21 @@ while not from_page == till_page:
                         if i4.has_attr("href"):
                             # print(i4)
                             # decode urlencoded and add to list
-                            data.append(urllib.parse.unquote(i4["href"]))
-                            ty = urllib.parse.unquote(os.path.basename(i4["href"]))
+                            dataimage.setdefault(key, []).append("{}".format(urllib.parse.unquote(i4["href"])))
+
                             break
 
                         else:
                             # print(i2)
                             if i4.has_attr("src"):
-                                ty = urllib.parse.unquote(os.path.basename(i4["src"]))
                                 # decode urlencoded and add to list
-                                data.append(urllib.parse.unquote(i4["src"]))
+                                dataimage.setdefault(key, []).append("{}".format(urllib.parse.unquote(i4["src"])))
 
                             break
-                    if tagf == 1:  # tag parser
-                        # block selection
 
-                        x = info(i, ty, file_tag, ".post_top > .taglist > b > a")
-                        file_tag = x
                     # дает некоторую информацию о посте
 
-                    if infof == 1:
-                        # рейтинг поста
-                        x = info(i, ty, rating_DMY_hm_postlink, ".ufoot > div > .post_rating > span")
-                        rating_DMY_hm_postlink = x
-                        # дата  день год месяц точное время
-
-                        x = info(i, ty, rating_DMY_hm_postlink, ".ufoot > div > .date > span > span")
-                        rating_DMY_hm_postlink = x
-
-                        # ссылка на пост
-                        x = infolist(i, ty, rating_DMY_hm_postlink, "href", ".ufoot > div > .link_wr > a")
-                        rating_DMY_hm_postlink = x
-
-                        # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
-                        x = info(i, ty, bestcommenttext_userinfo_avatar_pic, '.post_comment_list > div > div')
-                        bestcommenttext_userinfo_avatar_pic = x
-
-                        x = infolist(i, ty, bestcommenttext_userinfo_avatar_pic, "src",
-                                     '.post_comment_list > div > div > img')
-                        bestcommenttext_userinfo_avatar_pic = x
-
-        return data, file_tag, bestcommenttext_userinfo_avatar_pic, rating_DMY_hm_postlink
+        return dataimage, datatext, file_tag, bestcommenttext_userinfo_avatar_pic, rating_DMY_hm_postlink
 
 
     from_page = from_page - 1  # counter
@@ -138,34 +168,50 @@ while not from_page == till_page:
     # включаем парсер функцию
     x = parser(soup, tagf, infof)
 
-    y, p, c, h = x
+    y, p, c, h, b = x
     # print(y)
     # создаем базу данных с линками
-    links.extend(y)
-    # создаем дикт с ключами имен файлов (без пути) это теги файлов
-    tags.update(p)
-    com.update(c)
-    inf.update(h)
-    # print(len(tags))
-    print("scanning:", website + "/" + str(from_page), "\nfound elements:", len(links))
+    # извлекаем ссылки на пикчи (номер_поста:[картанка1, картинка2])
+    linksbase.update(y)
+    # извлекаем текст
+    data_text.update(p)
+    # создаем дикт с ключами номера поста  это теги файлов
+    tags.update(c)
+    # лучшие коменты и тд
+    com.update(h)
+    # пачка информации о посте 
+    inf.update(b)
 
-    # print(tags)
-    # b = list(set(b).union(y))
-    # print(len(links),links)
+    print("scanning:", website + "/" + str(from_page), "\nposts scanned:", len(linksbase.values()))
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
 # пример применения функции инфо - сортировка по рейтингу
 if ratingf == 1:
     print("sorting by rating...")
-    for me in links:
-        if float(inf[os.path.basename(me)][0]) >= rating:
-            sorted_links.append(me)
+    for me in linksbase:
+        if float(inf[me][0]) >= rating:
+            sorted_links.extend(linksbase[me])
     links = sorted_links
+
+else:
+    for link in linksbase.values():
+        links.extend(link)
+
+# def duplicate(x):
+#   print(len(list(dict.fromkeys(x))))
+
+
+# return list(dict.fromkeys(x))
+
 if len(links) == 0:
     print("files does not found")
 else:
-    print("Download", len(links), "files?\n([y]/n)?")
-    x = input(":")
+    print("\n\nDownload", len(links), "files?\n\n")
+    x = input("Proceed ([y]/n)?\n\n")
     if x.lower() == "y":
-        print("download starting...g\nначинаю загрузку...")
+        print("download starting...\nначинаю загрузку...")
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -185,8 +231,6 @@ else:
             'Pragma': 'no-cache'
         })
 
-
-        #
         counter = int(len(links))
 
         for Im_link in links:  # итерация хуяция
@@ -197,13 +241,14 @@ else:
             time.sleep(2)  # don't touch it coz ping need to not overload website or get wrecking ban
             # не трогать задержка нужна что бы не перегружать вэбсайт и не получить ебаный бан от сайта
 
-            with open(d_path + os.sep + os.path.basename(Im_link), 'wb') as handler:  # открываем файл
-                handler.write(req.get(Im_link, headers=request).content)  # делаем запрос на получение файла
+            # проверяем существует ли файл в диооектории
+            if not os.path.exists(d_path + os.sep + os.path.basename(Im_link)):
+                with open(d_path + os.sep + os.path.basename(Im_link), 'wb') as handler:  # открываем файл
+                    handler.write(req.get(Im_link, headers=request).content)  # делаем запрос на получение файла
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-print("\n\n#===================================#")
-print("# Code sequence successful complete #")
-print("#===================================#")
+print("\n\n#===================================#\n# Code sequence successful complete #"
+      "\n#===================================#")
 
 # def my_function(x):
 #    return list(dict.fromkeys(x))
