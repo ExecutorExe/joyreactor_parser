@@ -1,10 +1,11 @@
 # "Conda_env_3.7"
-import requests as req
+import requests as rq
 from bs4 import BeautifulSoup as bs
 import os.path
 import time
 import urllib.parse
 import pickle
+
 links = []
 data_text = {}
 tags = {}
@@ -27,15 +28,15 @@ tagf = 0  # функция включения парса тегов файла(�
 
 d_path = r"E:\parser_data"  # куда сохранять? | dir to save
 
-from_page = 4979  # от какой страницы | например http://joyreactor.cc/user/rukanishu/35  (первую стриницу можно
+from_page = 134  # от какой страницы | например http://joyreactor.cc/user/rukanishu/35  (первую стриницу можно
 # посмотреть снизу сайта)
 from_page_pickle = from_page
 till_page = 1  # до какой | http://joyreactor.cc/user/rukanishu/1
 
-page = "http://anime.reactor.cc/tag/ecchi"
+page = "http://anime.reactor.cc/tag/Ruby+Rose"
 # какая пейджа  пример http://joyreactor.cc/best(без оканчания на "/")
-# http:// - обязательно
-# в ссылке не должно быть подобных символов %D0%AD%D1%82%D1%82%D0%B8
+# :// - обязательно
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -51,10 +52,10 @@ while not from_page == till_page:
     time.sleep(1)
     ccc = 0
 
-
-    def getpage(page,from_page):
+    # функция если у вас проблемы с интеренетом
+    def getpage(page, from_page):
         try:
-            s = req.Session()
+            s = rq.Session()
             # getting url
             url = s.get(page + "/" + str(from_page))
             return url
@@ -63,11 +64,10 @@ while not from_page == till_page:
             # sleep for a bit in case that helps
             input("для переподключения введите все что угодно:")
             # try again
-            return getpage(page,from_page)
+            return getpage(page, from_page)
 
 
-    soup = bs(getpage(page,from_page).content, "html.parser")
-
+    soup = bs(getpage(page, from_page).content, "html.parser")
 
     # сам парсер
 
@@ -109,7 +109,7 @@ while not from_page == till_page:
                     for io in i2.select("div"):
                         if io.text:
                             datatext.setdefault(key, []).append("{}".format(io.text))
-                    # tag parser
+                    # tag web
                     # block selection
 
                     x = info(i, key, file_tag, ".post_top > .taglist > b > a")
@@ -185,9 +185,11 @@ while not from_page == till_page:
 
 # создаем сохранение переменной
 
-with open(os.path.basename(page)+"_pic"+"("+str(from_page_pickle)+"-"+str(till_page)+")"+".pkl", 'wb') as f:
+with open(os.path.basename(page) + "_pic" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl",
+          'wb') as f:
     pickle.dump(linksbase, f)
-with open(os.path.basename(page) + "_info" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
+with open(os.path.basename(page) + "_info" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl",
+          'wb') as f:
     pickle.dump(inf, f)
 # пример применения функции инфо - сортировка по рейтингу
 
