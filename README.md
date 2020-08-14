@@ -47,7 +47,8 @@ get_rdy(images)
 
 download_images(images, download_path, warn_on=True)
 
-1 аргумент принемает подготовленный список изображений (get_rdy(images) просто вставьте это)
+1 аргумент принемает подготовленный список изображений 
+(jp.download_images(jp.get_rdy(jp.sort_by_rating(linksbase, info, 0)), download_path=d_path) можно сделать так)
 2 аргумент в какую дирректорию надо скачивать
 3 аргумент отключения предупреждений по уполчанию влючено
 
