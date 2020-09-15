@@ -1,9 +1,46 @@
 # "Conda_env_3.7"
-import requests as rq
-from bs4 import BeautifulSoup as bs
-import os, os.path
+import os
+import os.path
 import time
 import urllib.parse
+import requests as rq  # '2.24.0'
+from bs4 import BeautifulSoup as bs  # version '4.9.1'
+from requests.exceptions import ConnectionError
+
+
+# можно делать запросы следующим образом:
+# http://joyreactor.cc/search?q=&user=&tags=котэ%2C+
+# в этом запросе выводятся все посты где присудствует тэг "котэ" (но это не точно)
+# запросы пишутся после "=", где:
+# q - поиск(хз как он работает)
+# user - автор поста
+# tags - тэги (самый полезный запрос, выведутся  посты которые содержат данные теги)
+# тэги пишутся через запятую где запятая в запросе это: %2C+
+# обратите внимание что запросы начинаются с 1
+# в отличие от конкретных тегов таких как joyreactor.cc/tag/котэ
+# конкретные теги смотри на реакторе и в его фендомах (они раздиляются)
+def page_count(page):
+    """
+
+    :param page: принимает ссылку и проверяет сколько страниц
+                 к примеру http://joyreactor.cc/tag/котэ
+    :return: возвращает int число
+    """
+    temp = []
+    try:
+        s = rq.Session()
+        soup = bs(s.get(page).content, "html.parser")
+        for i in soup.findAll(class_="pagination_expanded"):
+            for i0 in i.findAll("a"):
+                temp.extend(map(int, i0(text=True)))
+        return max(temp)
+    except ConnectionError:
+        print("упс, похоже что то произошло интернетом, пожалуста проверьте соединение")
+        # sleep for a bit in case that helps
+        # try again
+        time.sleep(2)
+        print("попытка переподключения...")
+        return page_count(page)
 
 
 def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
@@ -46,6 +83,34 @@ def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
 
 
                                                                """
+
+    def getpage(page, from_page):
+        try:
+            s = rq.Session()
+            # getting url
+            url = s.get(page + "/" + str(from_page))
+            return url
+        except ConnectionError:
+            print(
+                "упс, похоже что то произошло интернетом, пожалуста проверьте соединение и переподключитесь к впн")
+            # sleep for a bit in case that helps
+            input("для переподключения введите все что угодно:")
+
+            # try again
+            return getpage(page, from_page)
+
+    def info(i, ty, file_tag, path):
+        for ay in i.select(path):
+            # creating dict with tags
+            file_tag.setdefault(ty, []).append("{}".format(ay.text))
+        return file_tag
+
+    def infolist(i, ty, file_tag, atr, path):
+        for ay in i.select(path):
+            # creating dict with tags
+            file_tag.setdefault(ty, []).append("{}".format(ay[atr]))
+        return file_tag
+
     data_text = {}
     text_tags = {}
     comments = {}
@@ -56,35 +121,10 @@ def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
         print("scanning:", page + "/" + str(from_page))
 
         # функция если  проблемы с интеренетом
-        def getpage(page, from_page):
-            try:
-                s = rq.Session()
-                # getting url
-                url = s.get(page + "/" + str(from_page))
-                return url
-            except Exception:
-                print(
-                    "упс, похоже что то произошло интернетом, пожалуста проверьте соединение и переподключитесь к впн")
-                # sleep for a bit in case that helps
-                input("для переподключения введите все что угодно:")
-                # try again
-                return getpage(page, from_page)
 
         soup = bs(getpage(page, from_page).content, "html.parser")
 
         # сам парсер
-
-        def info(i, ty, file_tag, path):
-            for ay in i.select(path):
-                # creating dict with tags
-                file_tag.setdefault(ty, []).append("{}".format(ay.text))
-            return file_tag
-
-        def infolist(i, ty, file_tag, atr, path):
-            for ay in i.select(path):
-                # creating dict with tags
-                file_tag.setdefault(ty, []).append("{}".format(ay[atr]))
-            return file_tag
 
         atr = ["a", "img"]  # "a" - большие изображения которые надо разворачивать + гифки
         # "img" - мелкие изображения которые слишком малы что бы разворачивать
@@ -220,11 +260,12 @@ def download_images(images, download_path, warn_on=True):
     :param warn_on: 3 аргумент отключения предупреждений по уполчанию влючено
 
     """
+
     def downloader(links, d_path):
         print("download starting...\nначинаю загрузку...")
 
         # это данные которые передаются при запросе к link
-        # таким образом я обманываю сайт
+        # таким образом я избавляюсь от ватермарки сайта
 
         request = ({
             'Host': 'img10.reactor.cc',
@@ -250,7 +291,8 @@ def download_images(images, download_path, warn_on=True):
                     f.write(rq.get(Im_link, headers=request).content)
                     # делаем запрос на получение файла
 
-            except Exception:
+            except ConnectionError:
+
                 print(
                     "упс, похоже что то произошло интернетом, пожалуста проверьте соединение и "
                     "переподключитесь к впн")
@@ -272,6 +314,7 @@ def download_images(images, download_path, warn_on=True):
                 getimage(Im_link, request, path_FileBaseName)
             else:
                 print("Файл (" + os.path.basename(Im_link) + ") уже существует в директории (" + d_path + ")")
+
     # эта функция интуитивно понятна
     if warn_on:
         if len(images) == 0:
@@ -287,14 +330,7 @@ def download_images(images, download_path, warn_on=True):
         downloader(images, download_path)
 
 
-# создаем сохранение переменной
 
-# with open(urllib.parse.unquote(os.path.basename(page)) +
-#          "_pic" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
-#    pickle.dump(linksbase, f)
-# with open(urllib.parse.unquote(os.path.basename(page)) +
-#          "_info" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
-#    pickle.dump(inf, f)
 
-__version__ = "0.3"
+__version__ = "0.4"
 __author__ = "ExE https://github.com/ExecutorExe"
