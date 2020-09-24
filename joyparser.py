@@ -19,7 +19,7 @@ from requests.exceptions import ConnectionError
 # обратите внимание что запросы начинаются с 1
 # в отличие от конкретных тегов таких как joyreactor.cc/tag/котэ
 # конкретные теги смотри на реакторе и в его фендомах (они раздиляются)
-def page_count(page):
+def page_max(page):
     """
 
     :param page: принимает ссылку и проверяет сколько страниц
@@ -28,8 +28,8 @@ def page_count(page):
     """
     temp = []
     try:
-        s = rq.Session()
-        soup = bs(s.get(page).content, "html.parser")
+        # s = rq.Session()
+        soup = bs(rq.get(page).content, "html.parser")
         for i in soup.findAll(class_="pagination_expanded"):
             for i0 in i.findAll("a"):
                 temp.extend(map(int, i0(text=True)))
@@ -40,7 +40,7 @@ def page_count(page):
         # try again
         time.sleep(2)
         print("попытка переподключения...")
-        return page_count(page)
+        return page_max(page)
 
 
 def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
@@ -79,16 +79,23 @@ def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
     comments -- 4 лучшие комменты
     post_info -- 5 информация
     (ключи ко всей информации в переменных это цифры постов)
+    """
+    if "reactor.cc/search" in page:
+        if "q=&" in page:
+            page = page.replace("q=&", "")
+        if "user=&" in page:
+            page = page.replace("user=&", "")
+        sl = page.split("search", 2)
+        search = True
+    else:
+        search = False
 
-
-
-                                                               """
-
+    # сразу извиняюсь, на этом проекте я учился использовать bs4(я не читал док)
     def getpage(page, from_page):
         try:
-            s = rq.Session()
+            # s = rq.Session(page)
             # getting url
-            url = s.get(page + "/" + str(from_page))
+            url = rq.get(page)
             return url
         except ConnectionError:
             print(
@@ -118,13 +125,12 @@ def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
     images = {}
 
     while not from_page == until_page:
-        print("scanning:", page + "/" + str(from_page))
-
-        # функция если  проблемы с интеренетом
+        if search:
+            page = sl[0] + "search/+/" + str(from_page) + sl[1]
+        else:
+            page = page + "/" + str(from_page)
 
         soup = bs(getpage(page, from_page).content, "html.parser")
-
-        # сам парсер
 
         atr = ["a", "img"]  # "a" - большие изображения которые надо разворачивать + гифки
         # "img" - мелкие изображения которые слишком малы что бы разворачивать
@@ -178,16 +184,15 @@ def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
                 for i3 in i2.select(".image "):
                     # print(i3)
                     for i4 in i3.findAll(atr[index:]):
-
+                        # парс исзображения
                         if i4.has_attr("href"):
-                            # print(i4)
                             # decode urlencoded and add to list
                             dataimage.setdefault(key, []).append("{}".format(urllib.parse.unquote(i4["href"])))
 
                             break
 
                         else:
-                            # print(i2)
+                            # если нет достаточно крупного изображения
                             if i4.has_attr("src"):
                                 # decode urlencoded and add to list
                                 dataimage.setdefault(key, []).append("{}".format(urllib.parse.unquote(i4["src"])))
@@ -330,7 +335,14 @@ def download_images(images, download_path, warn_on=True):
         downloader(images, download_path)
 
 
+# создаем сохранение переменной
 
+# with open(urllib.parse.unquote(os.path.basename(page)) +
+#          "_pic" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
+#    pickle.dump(linksbase, f)
+# with open(urllib.parse.unquote(os.path.basename(page)) +
+#          "_info" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
+#    pickle.dump(inf, f)
 
 __version__ = "0.4"
 __author__ = "ExE https://github.com/ExecutorExe"
