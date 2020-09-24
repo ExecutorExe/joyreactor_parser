@@ -2,7 +2,9 @@
 
 
 joyparser - библиотека для парсинга joyreactor.cc
-
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+page_max (page): - определяет максимальное количество страниц
+возвращает int число
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 parser(page, from_page, until_page=0, on_text_tags=False, on_info=False)
 
