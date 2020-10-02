@@ -126,15 +126,16 @@ def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
 
     while not from_page == until_page:
         if search:
-            page = sl[0] + "search/+/" + str(from_page) + sl[1]
+            page_ind = sl[0] + "search/+/" + str(from_page) + sl[1]
         else:
-            page = page + "/" + str(from_page)
+            page_ind = page + "/" + str(from_page)
 
-        soup = bs(getpage(page, from_page).content, "html.parser")
+            print(page_ind)
+        soup = bs(getpage(page_ind, from_page).content, "html.parser")
 
         atr = ["a", "img"]  # "a" - большие изображения которые надо разворачивать + гифки
         # "img" - мелкие изображения которые слишком малы что бы разворачивать
-        global key
+        #global key
 
         datatext = {}
         dataimage = {}
