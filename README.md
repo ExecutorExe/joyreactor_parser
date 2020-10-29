@@ -72,6 +72,7 @@ jp.download_images(jp.get_rdy(jp.sort_by_rating(linksbase, info, 0)), download_p
 # Требования
 
 python 3.7
+
 requirements.txt
 
 # Пример использования
