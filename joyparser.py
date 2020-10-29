@@ -253,10 +253,10 @@ def get_rdy(images):
     :param images: принимает словарь с картинками что бы подготовить к скачиванию
     :return: возвращает список
     """
-
+    lk = []
     for link in images.values():
-
-        return link
+        lk.extend(link)
+    return lk
 
 def get_post_rdy(images):
     """
