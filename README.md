@@ -70,6 +70,7 @@ download_images(images, download_path, warn_on=True)
 jp.download_images(jp.get_rdy(jp.sort_by_rating(linksbase, info, 0)), download_path=d_path) можно сделать так
 
 # Требования
+Советую использовать conda 
 
 python 3.7
 
