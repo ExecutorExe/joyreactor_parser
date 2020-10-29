@@ -7,6 +7,7 @@ import requests as rq  # '2.24.0'
 from bs4 import BeautifulSoup as bs  # version '4.9.1'
 from requests.exceptions import ConnectionError
 
+# внимание, скорость монижена для того что бы не перегружать сервера сайта
 
 # можно делать запросы следующим образом:
 # http://joyreactor.cc/search?q=&user=&tags=котэ%2C+
@@ -41,6 +42,8 @@ def page_max(page):
         time.sleep(2)
         print("попытка переподключения...")
         return page_max(page)
+    except ValueError:
+        return 1
 
 
 def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
@@ -250,10 +253,24 @@ def get_rdy(images):
     :param images: принимает словарь с картинками что бы подготовить к скачиванию
     :return: возвращает список
     """
-    ln = []
+
     for link in images.values():
-        ln.extend(link)
-    return ln
+
+        return link
+
+def get_post_rdy(images):
+    """
+    костыль который не вызывает ошибки при скачки одиночного поста
+    (улаляет javascript из последнего индекса)
+    :param images: принимает словарь с картинками что бы подготовить к скачиванию
+    :return: возвращает список
+    """
+    for link in images.values():
+        if "javascript:" in link[::-1]:
+            link.remove("javascript:")
+            return link
+        else:
+            return link
 
 
 def download_images(images, download_path, warn_on=True):
@@ -345,5 +362,5 @@ def download_images(images, download_path, warn_on=True):
 #          "_info" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
 #    pickle.dump(inf, f)
 
-__version__ = "0.4"
+__version__ = "0.5"
 __author__ = "ExE https://github.com/ExecutorExe"
