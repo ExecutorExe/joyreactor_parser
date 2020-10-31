@@ -32,7 +32,7 @@ def page_max(page):
         # s = rq.Session()
         soup = bs(rq.get(page).content, "html.parser")
         for i in soup.findAll(class_="pagination_expanded"):
-            for i0 in i.findAll("a"):
+            for i0 in i.findAll(["a","span"]):
                 temp.extend(map(int, i0(text=True)))
         return max(temp)
     except ConnectionError:
