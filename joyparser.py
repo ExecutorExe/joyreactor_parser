@@ -32,8 +32,12 @@ def page_max(page):
         # s = rq.Session()
         soup = bs(rq.get(page).content, "html.parser")
         for i in soup.findAll(class_="pagination_expanded"):
-            for i0 in i.findAll(["a","span"]):
+            for i0 in i.findAll(["a"]):
                 temp.extend(map(int, i0(text=True)))
+            for i1 in i.findAll("span", {'class':"current"}):
+                temp.extend(map(int, i1(text=True)))
+
+
         return max(temp)
     except ConnectionError:
         print("упс, похоже что то произошло интернетом, пожалуста проверьте соединение")
@@ -47,7 +51,7 @@ def page_max(page):
             print(True)
             return 1
         else:
-            return ValueError
+            raise ValueError
 
 
 def parser(page, from_page, until_page=0, on_text_tags=False, on_info=False):
