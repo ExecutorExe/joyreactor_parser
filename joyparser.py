@@ -1,4 +1,3 @@
-# "Conda_env_3.7"
 import os
 import os.path
 import time
@@ -46,11 +45,10 @@ def page_max(page):
         print("попытка переподключения...")
         return page_max(page)
     except ValueError:
-        if "/post/" in page:
+        if "/post/" in page or "/tag/" in page or "/user/" in page:
             #print(True)
             return 1
-        elif "/tag/" in page:
-            return 1
+
         else:
             raise ValueError
 
