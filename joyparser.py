@@ -37,7 +37,6 @@ def page_max(page):
             for i1 in i.findAll("span", {'class':"current"}):
                 temp.extend(map(int, i1(text=True)))
 
-
         return max(temp)
     except ConnectionError:
         print("упс, похоже что то произошло интернетом, пожалуста проверьте соединение")
@@ -48,7 +47,9 @@ def page_max(page):
         return page_max(page)
     except ValueError:
         if "/post/" in page:
-            print(True)
+            #print(True)
+            return 1
+        elif "/tag/" in page:
             return 1
         else:
             raise ValueError
