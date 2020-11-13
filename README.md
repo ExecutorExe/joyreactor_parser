@@ -29,9 +29,9 @@ parser(page, from_page, until_page=0, on_text_tags=False, on_info=False)
 
     по умолчанию выключен
 
--posttext -- парсит текст поста
+- posttext -- парсит текст поста
 
-   по умолчанию выключен
+    по умолчанию выключен
 
 -- Возвращает
 
