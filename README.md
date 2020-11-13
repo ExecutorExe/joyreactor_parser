@@ -123,10 +123,8 @@ from_page = 1
 # от какой страницы | например http://joyreactor.cc/user/котэ/35 
 # или воспользуйтесь jp.page_max(page) эта функция вернет максимальное количество страниц
 
-x = jp.parser(page, jp.page_max(page), till_page, True, True)
-
-linksbase, datatext, tags, com, inf = x
+linksbase, info, txt = jp.parser(page, from_page, 0, on_info=True)
 
 
-jp.download_images(jp.get_rdy(jp.sort_by_rating(linksbase, inf, 0)), download_path=r"D:\parser_data")
+jp.download_images(jp.get_rdy(jp.sort_by_rating(linksbase, info, 0)), download_path=d_path)
 ```
