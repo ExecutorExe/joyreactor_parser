@@ -434,5 +434,5 @@ def download_images(images, download_path, warn_on=True):
 #          "_info" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
 #    pickle.dump(inf, f)
 
-__version__ = "0.5"
+__version__ = "0.6"
 __author__ = "ExE https://github.com/ExecutorExe"
