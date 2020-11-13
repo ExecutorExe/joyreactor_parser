@@ -118,13 +118,13 @@ till_page = 0  # до какой | http://joyreactor.cc/user/котэ/1
 page = "http://joyreactor.cc/tag/котэ"
 # какая пейджа  пример http://joyreactor.cc/котэ (без оканчания на "/")
 
+d_path = r"D:\parser_data"
 
 from_page = 1
 # от какой страницы | например http://joyreactor.cc/user/котэ/35 
 # или воспользуйтесь jp.page_max(page) эта функция вернет максимальное количество страниц
 
 linksbase, info, txt = jp.parser(page, from_page, 0, on_info=True)
-
 
 jp.download_images(jp.get_rdy(jp.sort_by_rating(linksbase, info, 0)), download_path=d_path)
 ```
