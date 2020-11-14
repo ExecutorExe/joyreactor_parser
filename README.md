@@ -126,5 +126,5 @@ from_page = 1
 
 linksbase, info, txt = jp.parser(page, from_page, 0, on_info=True)
 
-jp.download_images(jp.get_rdy(jp.sort_by_rating(linksbase, info, 0)), download_path=d_path)
+jp.download_images(jp.get_rdy(jp.sort_by_rate_comments(linksbase, info[1], 0)), download_path=d_path)
 ```
