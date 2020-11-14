@@ -8,9 +8,9 @@ from bs4 import BeautifulSoup as bs  # version '4.9.1'
 from requests.exceptions import ConnectionError
 import numpy as np  # 1.19.1
 from numpy import array as araara  # :D
+import re
 
-
-# внимание, скорость понижена для того что бы не перегружать сервера сайта
+# внимание, скорость монижена для того что бы не перегружать сервера сайта
 
 # можно делать запросы следующим образом:
 # http://joyreactor.cc/search?q=&user=&tags=котэ%2C+
@@ -143,6 +143,7 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
     txt = []
     images = []
     tags = []
+
     while not from_page == until_page:
         if search:
             page_ind = sl[0] + "search/+/" + str(from_page) + sl[1]
@@ -157,7 +158,6 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
         temprating = []
         tempkey = []
         temptags = []
-
         templencom = []
         tempbestcom = []
 
@@ -195,7 +195,8 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
 
                 for ay in i.select('.commentnum.toggleComments'):
                     # creating dict with tags
-                    templencom.append(int(ay.text[-1]))
+
+                    templencom.extend((re.findall(r'\d+', ay.text)))
 
             dataimage = []
             for i0 in i.select(".post_content"):
@@ -236,24 +237,31 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
         # возможно proxifier вместе с tor browser прокатит
         time.sleep(1)
     # print(temptext)
-    info = [tags, rating, date, keys, lencomments, bestcomments]
+    info = [tags, rating, date, keys, araara(lencomments).astype(dtype=int), bestcomments]
     return images, info, txt
 
 
 # Saving the objects:
 
 
-# пример применения функции инфо - сортировка по рейтингу
-def sort_by_rating(linksbase, info, rating):
+def sort_by_rate_comments(linksbase, info_index, rating = 0):
     """
+    Рейтинг = imfo[1] | Комменты - imfo[4]
+
+    
     :param linksbase: 1 аргумент это что надо отсартировать картинки/текст
     :param info: 2 аргумент переменная с информацией
     :param rating: 3 аргумент - цифра, ниже этого значения посты не пройдут
     :return: список с удаленными в них постами ниже определенного рейтинга
     """
+
     sorted_links = []
-    for i in np.where(araara(info[1]) >= rating)[0]:
-        sorted_links.append(linksbase[i])
+    idexes = np.argsort(info_index)[::-1]
+    for i, v in enumerate(araara(info_index)[idexes]):
+        if v < rating:
+            break
+        sorted_links.append(linksbase[idexes[i]])
+
     return sorted_links
 
 
@@ -436,3 +444,4 @@ def download_images(images, download_path, warn_on=True):
 
 __version__ = "0.6"
 __author__ = "ExE https://github.com/ExecutorExe"
+
