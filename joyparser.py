@@ -23,6 +23,14 @@ import re
 # обратите внимание что запросы начинаются с 1
 # в отличие от конкретных тегов таких как joyreactor.cc/tag/котэ
 # конкретные теги смотри на реакторе и в его фендомах (они раздиляются)
+
+timeout = 1
+# не трогать этот параметр блэт. сайт может забанить если запросов больше чем определенное значение
+# бан на какой то промежуток по ip вероятнее всего и может еще и по headers(это переменная request)
+# фиксится библиотекой stem не я вам этого не говорил, и это не хорошо
+# возможно proxifier вместе с tor browser прокатит
+
+
 def page_max(page):
     """
 
@@ -231,11 +239,8 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
         bestcomments.extend(tempbestcom)
         keys.extend(tempkey)
         date.extend(tempdate)
-        # не трогать блэт. сайт может забанить если запросов больше чем определенное значение
-        # бан на какой то промежуток по ip вероятнее всего и может еще и по headers(это переменная request)
-        # фиксится библиотекой stem не я вам этого не говорил, и это не хорошо
-        # возможно proxifier вместе с tor browser прокатит
-        time.sleep(1)
+
+        time.sleep(timeout)
     # print(temptext)
     info = [tags, rating, date, keys, araara(lencomments).astype(dtype=int), bestcomments]
     return images, info, txt
@@ -248,7 +253,7 @@ def sort_by_rate_comments(linksbase, info_index, rating = 0):
     """
     Рейтинг = imfo[1] | Комменты - imfo[4]
 
-    
+
     :param linksbase: 1 аргумент это что надо отсартировать картинки/текст
     :param info: 2 аргумент переменная с информацией
     :param rating: 3 аргумент - цифра, ниже этого значения посты не пройдут
@@ -383,7 +388,7 @@ def download_images(images, download_path, warn_on=True):
         # функция если у вас проблемы с интеренетом
         def getimage(Im_link, request, path_FileBaseName):
             try:
-                time.sleep(1)  # don't touch it coz ping need to not overload website or get frecking ban
+                time.sleep(timeout)  # don't touch it coz ping need to not overload website or get frecking ban
                 # не трогать задержка нужна что бы не перегружать вэбсайт и не получить ебаный бан от сайта
                 with open(path_FileBaseName, 'wb') as f:  # открываем файл
                     f.write(rq.get(Im_link, headers=request).content)
@@ -444,4 +449,3 @@ def download_images(images, download_path, warn_on=True):
 
 __version__ = "0.6"
 __author__ = "ExE https://github.com/ExecutorExe"
-
