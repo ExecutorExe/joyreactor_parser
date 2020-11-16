@@ -25,11 +25,12 @@ import re
 # конкретные теги смотри на реакторе и в его фендомах (они раздиляются)
 
 timeout = 1
-# не трогать этот параметр блэт. сайт может забанить если запросов больше чем определенное значение
-# бан на какой то промежуток по ip вероятнее всего и может еще и по headers(это переменная request)
-# фиксится библиотекой stem не я вам этого не говорил, и это не хорошо
-# возможно proxifier вместе с tor browser прокатит
 
+
+# не трогать этот параметр блэт.
+# сайт может забанить на какой то промежуток если запросов больше чем определенное значение
+# если бы не это, то я бы использовал multiprocessing или numba фиксится библиотекой stem,
+# возможно proxifier вместе с tor browser прокатит
 
 def page_max(page):
     """
@@ -249,7 +250,7 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
 # Saving the objects:
 
 
-def sort_by_rate_comments(linksbase, info_index, rating = 0):
+def sort_by_rate_comments(linksbase, info_index, rating=0):
     """
     Рейтинг = imfo[1] | Комменты - imfo[4]
 
@@ -270,7 +271,7 @@ def sort_by_rate_comments(linksbase, info_index, rating = 0):
     return sorted_links
 
 
-def except_tag(linkbase=list, info=list, tagexceptions=list,spike = None):
+def except_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
     """
 
     :param linkbase: принемает многомрный список изображений/текста
@@ -296,7 +297,7 @@ def except_tag(linkbase=list, info=list, tagexceptions=list,spike = None):
     return sortedlist
 
 
-def sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike = None):
+def sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
     """
 
     :param linkbase: принемает многомрный список изображений/текста
