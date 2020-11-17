@@ -9,6 +9,7 @@ from requests.exceptions import ConnectionError
 import numpy as np  # 1.19.1
 from numpy import array as araara  # :D
 import re
+import logging
 
 # внимание, скорость монижена для того что бы не перегружать сервера сайта
 
@@ -26,8 +27,6 @@ import re
 
 
 timeout = 1
-
-
 # не трогать этот параметр блэт.
 # сайт может забанить на какой то промежуток если запросов больше чем определенное значение
 # если бы не это, то я бы использовал multiprocessing
@@ -52,19 +51,17 @@ def page_max(page):
 
         return max(temp)
     except ConnectionError:
-        print("упс, похоже что то произошло интернетом, пожалуста проверьте соединение")
+        print("<<!alert, connection error!>>")
         # sleep for a bit in case that helps
         # try again
         time.sleep(2)
-        print("попытка переподключения...")
+        print("<<trying to reconnect>>")
         return page_max(page)
-    except ValueError:
+    except ValueError as e:
         if "/post/" in page or "/tag/" in page or "/user/" in page:
-            # print(True)
             return 1
-
         else:
-            raise ValueError
+            raise e
 
 
 def parser(page, from_page, until_page=0, on_info=False, posttext=False):
@@ -130,9 +127,9 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
             url = rq.get(page)
             return url
         except ConnectionError:
-            print("<<woops, probably connection error>>")
+            print("<<!alert, connection error!>>")
             # sleep for a bit in case that helps
-            input("<<to reconnect type anything>>")
+            input("><to reconnect type anything><")
 
             # try again
             return getpage(page, from_page)
@@ -190,7 +187,12 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
                 # temp = []
                 for ay in i.select(".ufoot > div > .post_rating > span"):
                     # creating dict with tags
-                    temprating.append(float(ay.text))
+                    try:
+                        temprating.append(float(ay.text))
+                    except ValueError as e:
+                        print(e)
+                        logging.error("<<!>>connect to VPN<<!>>")
+                        exit()
 
                 # дата  день год месяц точное время
                 tempdate.append(info(i, ".ufoot > div > .date > span > span"))
@@ -336,26 +338,6 @@ def get_rdy(images):
         return []
 
 
-"""
-def get_post_rdy(images):
-    """"""
-    костыль который не вызывает ошибки при скачки одиночного поста
-    (улаляет javascript из последнего индекса)
-    :param images: принимает list с картинками что бы подготовить к скачиванию
-    :return: возвращает одномерный numpy массив
-
-    """"""
-    print(images)
-    print(np.where(images =="javascript:"))
-    for link in images.values():
-        if "javascript:" in link[::-1]:
-            link.remove("javascript:")
-            return link
-        else:
-            return link
-"""
-
-
 def download_images(images, download_path, warn_on=True):
     """
 
@@ -396,16 +378,16 @@ def download_images(images, download_path, warn_on=True):
                     f.write(rq.get(Im_link, headers=request).content)
                     # делаем запрос на получение файла
 
-            except ConnectionError:
+            except ConnectionError as e:
                 if warn_on:
 
-                    print("<<woops, probably connection error>>")
+                    print("<<!alert, connection error!>>")
                     # sleep for a bit in case that helps
-                    input("<<to reconnect type anything>>")
+                    input("><to reconnect type anything><")
                     # try again
                     return getimage(Im_link, request, path_FileBaseName)
                 else:
-                    raise ConnectionError
+                    raise e
 
         for Im_link in links:  # итерация хуяция
 
@@ -420,7 +402,7 @@ def download_images(images, download_path, warn_on=True):
             else:
                 if warn_on:
                     print("<<files left:", counter, ">>")
-                    print("<<File (" + os.path.basename(Im_link) + ") already existing in dir (" + d_path + ")>>")
+                    print("<<!File (" + os.path.basename(Im_link) + ") already existing in dir (" + d_path + ")!>>")
 
     # эта функция интуитивно понятна
     if warn_on:
@@ -428,27 +410,18 @@ def download_images(images, download_path, warn_on=True):
             print("<<files does not found>>")
         else:
             print("\n<<Download", len(images), "files?>>\n")
-            x = input("<<Proceed ([y]/n)?>>")
+            x = input("><Proceed ([y]/n)?><")
             if x.lower() == "y":
                 downloader(images, download_path)
             elif x.lower() == "n":
-                print("<<Ext>>")
+                print("<<exiting>>")
             else:
-                print("<<Input value is incorrect, try again.>>\n[y - Yes]\n[n - No]")
+                print("><!Input value is incorrect, try again.!><\n[y - Yes]\n[n - No]")
                 download_images(images, download_path)
 
     else:
         downloader(images, download_path)
 
 
-# создаем сохранение переменной
-
-# with open(urllib.parse.unquote(os.path.basename(page)) +
-#          "_pic" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
-#    pickle.dump(linksbase, f)
-# with open(urllib.parse.unquote(os.path.basename(page)) +
-#          "_info" + "(" + str(from_page_pickle) + "-" + str(till_page) + ")" + ".pkl", 'wb') as f:
-#    pickle.dump(inf, f)
-
-__version__ = "0.6"
+__version__ = "0.2.1"
 __author__ = "ExE https://github.com/ExecutorExe"
