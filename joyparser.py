@@ -423,5 +423,5 @@ def download_images(images, download_path, warn_on=True):
         downloader(images, download_path)
 
 
-__version__ = "0.2.1"
+__version__ = "0.1.0"
 __author__ = "ExE https://github.com/ExecutorExe"
