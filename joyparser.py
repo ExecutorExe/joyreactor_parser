@@ -26,6 +26,8 @@ import re
 
 
 timeout = 1
+
+
 # не трогать этот параметр блэт.
 # сайт может забанить на какой то промежуток если запросов больше чем определенное значение
 # если бы не это, то я бы использовал multiprocessing
@@ -128,10 +130,9 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
             url = rq.get(page)
             return url
         except ConnectionError:
-            print(
-                "упс, похоже что то произошло интернетом, пожалуста проверьте соединение и переподключитесь к впн")
+            print("<<woops, probably connection error>>")
             # sleep for a bit in case that helps
-            input("для переподключения введите все что угодно:")
+            input("<<to reconnect type anything>>")
 
             # try again
             return getpage(page, from_page)
@@ -329,8 +330,10 @@ def get_rdy(images):
     :param images: принимает list с картинками что бы подготовить к скачиванию
     :return: возвращает одномерный numpy массив
     """
-
-    return np.concatenate(images).ravel()
+    try:
+        return np.concatenate(images).ravel()
+    except ValueError:
+        return []
 
 
 """
@@ -365,7 +368,6 @@ def download_images(images, download_path, warn_on=True):
     """
 
     def downloader(links, d_path):
-        print("download starting...\nначинаю загрузку...")
 
         # это данные которые передаются при запросе к link
         # таким образом я избавляюсь от ватермарки сайта
@@ -395,18 +397,18 @@ def download_images(images, download_path, warn_on=True):
                     # делаем запрос на получение файла
 
             except ConnectionError:
+                if warn_on:
 
-                print(
-                    "упс, похоже что то произошло интернетом, пожалуста проверьте соединение и "
-                    "переподключитесь к впн")
-                # sleep for a bit in case that helps
-                input("для переподключения введите все что угодно:")
-                # try again
-                return getimage(Im_link, request, path_FileBaseName)
+                    print("<<woops, probably connection error>>")
+                    # sleep for a bit in case that helps
+                    input("<<to reconnect type anything>>")
+                    # try again
+                    return getimage(Im_link, request, path_FileBaseName)
+                else:
+                    raise ConnectionError
 
         for Im_link in links:  # итерация хуяция
 
-            print("files left:", counter)
             counter = counter - 1
 
             path_FileBaseName = d_path + os.sep + os.path.basename(Im_link)
@@ -416,25 +418,26 @@ def download_images(images, download_path, warn_on=True):
 
                 getimage(Im_link, request, path_FileBaseName)
             else:
-                print("Файл (" + os.path.basename(Im_link) + ") уже существует в директории (" + d_path + ")")
+                if warn_on:
+                    print("<<files left:", counter, ">>")
+                    print("<<File (" + os.path.basename(Im_link) + ") already existing in dir (" + d_path + ")>>")
 
     # эта функция интуитивно понятна
     if warn_on:
         if len(images) == 0:
-            print("files does not found")
+            print("<<files does not found>>")
         else:
-            print("\nDownload", len(images), "files?\n")
-            x = input("Proceed ([y]/n)?")
+            print("\n<<Download", len(images), "files?>>\n")
+            x = input("<<Proceed ([y]/n)?>>")
             if x.lower() == "y":
                 downloader(images, download_path)
             elif x.lower() == "n":
-                print("Exiting...")
+                print("<<Ext>>")
             else:
-                print("Input value is incorrect, try again.\n[y - Yes]\n[n - No]")
+                print("<<Input value is incorrect, try again.>>\n[y - Yes]\n[n - No]")
                 download_images(images, download_path)
 
     else:
-        print("files found:", len(images))
         downloader(images, download_path)
 
 
