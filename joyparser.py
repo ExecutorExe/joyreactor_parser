@@ -391,7 +391,7 @@ def download_images(images, download_path, warn_on=True):
 
         for Im_link in links:  # итерация хуяция
             if warn_on:
-                print("<<files left:", counter, ">>")
+                print("<< files left:", counter, ">>")
             counter = counter - 1
 
             path_FileBaseName = d_path + os.sep + os.path.basename(Im_link)
