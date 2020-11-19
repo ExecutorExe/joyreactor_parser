@@ -58,7 +58,7 @@ except_tag(linkbase=list, info=list, tagexceptions=list)
 -- возвращает новый отсортированный список
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike = None):
- сортирует по тегам
+ оставляет желательные теги
 
 - linkbase: принимает многомрный список изображений/текста
 
