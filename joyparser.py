@@ -27,6 +27,8 @@ import logging
 
 
 timeout = 1
+
+
 # не трогать этот параметр блэт.
 # сайт может забанить на какой то промежуток если запросов больше чем определенное значение
 # если бы не это, то я бы использовал multiprocessing
@@ -335,12 +337,30 @@ def get_rdy(images):
     try:
         val = np.concatenate(images).ravel()
         # если пост
-        i=np.where(val == "javascript:")
+        i = np.where(val == "javascript:")
         if i[0]:
             val = np.delete(val, i)
         return val
     except ValueError:
         return []
+
+
+def parse_user_tag_list(page):
+    temp = []
+    try:
+        # s = rq.Session()
+        soup = bs(rq.get(page).content, "html.parser")
+        for i in soup.select(".sidebar_block.blogs_wr > .sidebarContent"):
+            for i0 in i.findAll(["a"]):
+                temp.append(urllib.parse.unquote(i0["href"]))
+        return temp
+    except ConnectionError:
+        print("<<!alert, connection error!>>")
+        # sleep for a bit in case that helps
+        # try again
+        time.sleep(2)
+        print("<<trying to reconnect>>")
+        return page_max(page)
 
 
 def download_images(images, download_path, warn_on=True):
@@ -404,11 +424,9 @@ def download_images(images, download_path, warn_on=True):
 
             if not os.path.exists(path_FileBaseName):
 
-
                 getimage(Im_link, request, path_FileBaseName)
             else:
                 if warn_on:
-
                     print("<<!File (" + os.path.basename(Im_link) + ") already existing in dir (" + d_path + ")!>>")
 
     # эта функция интуитивно понятна
