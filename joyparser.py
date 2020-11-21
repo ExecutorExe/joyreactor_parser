@@ -333,7 +333,12 @@ def get_rdy(images):
     :return: возвращает одномерный numpy массив
     """
     try:
-        return np.concatenate(images).ravel()
+        val = np.concatenate(images).ravel()
+        # если пост
+        i=np.where(val == "javascript:")
+        if i[0]:
+            val = np.delete(val, i)
+        return val
     except ValueError:
         return []
 
