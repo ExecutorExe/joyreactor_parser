@@ -275,6 +275,23 @@ def sort_by_rate_comments(linksbase, info_index, rating=0):
     return sorted_links
 
 
+def sort_by_rate_comments_return_indexes(info_index, rating=0):
+    """
+    Рейтинг = imfo[1] | Комменты - imfo[4]
+
+
+
+    :param info: 1 аргумент переменная с информацией
+    :param rating: 2 аргумент - цифра, ниже этого значения посты не пройдут
+    :return: отсортированные индексы
+    """
+
+    idexes = np.argsort(info_index)[::-1]
+    for i, v in enumerate(araara(info_index)[idexes]):
+        if v < rating:
+            return idexes[:i]
+
+
 def except_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
     """
 
@@ -290,15 +307,41 @@ def except_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
 
     sortedlist = []
 
-    for i, v in enumerate(info[0]):
+    for i, v in enumerate(info):
         counter = 0
         for i0 in tagexceptions:
             if i0 in v:
                 counter = counter + 1
-            if counter != spike and i0 == tagexceptions[-1]:
-                sortedlist.append(linkbase[i])
+        if not counter >= spike:
+            sortedlist.append(linkbase[i])
 
     return sortedlist
+
+
+def except_tag_return_indexes(info=list, tagexceptions=list, spike=None):
+    """
+
+    :param info: принемает масив с информацией
+    :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
+    :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
+    засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
+    :return: возвращает новый отсортированный список
+    """
+    if spike is None:
+        spike = len(tagexceptions)
+
+    sortedlist = []
+
+    for i, v in enumerate(info):
+        counter = 0
+        for i0 in tagexceptions:
+            if i0 in v:
+                counter = counter + 1
+
+        if not counter >= spike:
+            sortedlist.append(i)
+
+    return araara(sortedlist)
 
 
 def sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
@@ -317,7 +360,7 @@ def sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
 
     sortedlist = []
 
-    for i, v in enumerate(info[0]):
+    for i, v in enumerate(info):
         counter = 0
         for i0 in tagexceptions:
             if i0 in v:
@@ -326,6 +369,33 @@ def sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
                 sortedlist.append(linkbase[i])
                 break
     return sortedlist
+
+
+def sort_by_tag_return_indexes(info=list, tagexceptions=list, spike=None):
+    """
+
+
+    :param info: принемает масив с информацией
+    :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
+    :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
+    засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
+    :return: возвращает новый отсортированный список
+
+    """
+    if spike is None:
+        spike = len(tagexceptions)
+
+    indexes = []
+
+    for i, v in enumerate(info):
+        counter = 0
+        for i0 in tagexceptions:
+            if i0 in v:
+                counter = counter + 1
+            if counter == spike:
+                indexes.append(i)
+                break
+    return araara(indexes)
 
 
 def get_rdy(images):
