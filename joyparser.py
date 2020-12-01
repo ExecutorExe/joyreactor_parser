@@ -325,7 +325,7 @@ def except_tag_return_indexes(info=list, tagexceptions=list, spike=None):
     :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
     :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
-    :return: возвращает новый отсортированный список
+    :return: возвращает индексы
     """
     if spike is None:
         spike = len(tagexceptions)
