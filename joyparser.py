@@ -10,6 +10,8 @@ import numpy as np  # 1.19.1
 from numpy import array as araara  # :D
 import re
 import logging
+import pickle
+import os.path
 
 # внимание, скорость монижена для того что бы не перегружать сервера сайта
 
@@ -516,6 +518,32 @@ def download_images(images, download_path, warn_on=True):
 
     else:
         downloader(images, download_path)
+
+
+def save_var_ovr(var, name="new_pkl_file"):
+    """save variable with overwrite if name exists
+    """
+    with open(name + ".pkl", "wb") as f:
+        pickle.dump(var, f)
+
+
+def save_var(var, name="new_pkl_file", __c=""):
+    """save variable without overwrite"""
+    if os.path.isfile(name + str(__c) + ".pkl"):
+        if __c == "":
+            __c = "0"
+        else:
+            __c = int(__c) + 1
+        save_var(var, name, __c)
+    else:
+        save_var_ovr(var, name + str(__c))
+
+
+def load_var(file):
+    """load variable"""
+    with open(file, "rb") as f:
+        var = pickle.load(f)
+    return var
 
 
 __author__ = "ExE https://github.com/ExecutorExe"
