@@ -29,7 +29,7 @@ import os.path
 
 
 timeout = 1
-
+timeoutwarn = "<<! Ban from host warning !>>\n<<Increase timeout variable else you shall be banned !>>"
 
 # не трогать этот параметр блэт.
 # сайт может забанить на какой то промежуток если запросов больше чем определенное значение
@@ -69,6 +69,7 @@ def page_max(page):
 
 
 def parser(page, from_page, until_page=0, on_info=False, posttext=False):
+
     """
 
     Input:
@@ -113,6 +114,7 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
 
 
     """
+    assert (timeout < 1, timeoutwarn)
     if "reactor.cc/search" in page:
         if "q=&" in page:
             page = page.replace("q=&", "")
@@ -436,6 +438,7 @@ def parse_user_tag_list(page):
 
 
 def download_images(images, download_path, warn_on=True):
+
     """
 
     :param images: 1 аргумент принемает подготовленный список изображений (get_rdy(images) просто вставьте это)
@@ -445,6 +448,7 @@ def download_images(images, download_path, warn_on=True):
     :param warn_on: 3 аргумент отключения предупреждений по уполчанию влючено
 
     """
+    assert (timeout < 1, timeoutwarn)
 
     def downloader(links, d_path):
 
@@ -546,4 +550,44 @@ def load_var(file):
     return var
 
 
-__author__ = "ExE https://github.com/ExecutorExe"
+def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
+
+    """
+    плюсо/минусо-мет
+    (просьба не злоупотреблять этой функцией)
+
+    :param posts_array: номера постов(одномерный масив)
+    :param cookie: куки(что бы их узнать зайдите на сайт и нажмите f12 -> network -> проголосуйте за любой пост -> в появившейся загрузке в пункте reqest headers будет ваша куки)
+    :param token: все тоже самое что и с куки, в самом низу должен быть токен
+    :param vote: голосует за или против(True/False)
+    :param abyss: понятие не имею нужен он или нет(у меня он был 0)
+    :return: void
+    """
+    assert (timeout < 1, timeoutwarn)
+    if 'token=' in token:
+        token.replace("token=", "")
+    header = ({
+        'Accept': 'text/html, */*; q=0.01',
+        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Language': 'en,ru-RU;q=0.9,ru;q=0.8',
+        'Connection': 'keep-alive',
+        'Cookie': None,
+        'DNT': '1',
+        'Host': 'joyreactor.cc',
+        'Referer': 'http://joyreactor.cc/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest',
+    })
+    header["Cookie"] = cookie
+
+    if vote:
+        votefor = "plus"
+    else:
+        votefor = "minus"
+    for i in posts_array:
+        adr = 'http://joyreactor.cc/post_vote/add/' + str(i) + '/' + votefor + '?token=' + token + '&abyss=' + __abyss
+        rq.get(adr, headers=header)
+        time.sleep(timeout)
+
+
+__author__ = "ExE"
