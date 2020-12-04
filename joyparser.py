@@ -30,6 +30,7 @@ import os.path
 
 timeout = 1
 
+
 # не трогать этот параметр блэт.
 # сайт может забанить на какой то промежуток если запросов больше чем определенное значение
 # если бы не это, то я бы использовал multiprocessing
@@ -68,7 +69,6 @@ def page_max(page):
 
 
 def parser(page, from_page, until_page=0, on_info=False, posttext=False):
-
     """
 
     Input:
@@ -436,7 +436,6 @@ def parse_user_tag_list(page):
 
 
 def download_images(images, download_path, warn_on=True):
-
     """
 
     :param images: 1 аргумент принемает подготовленный список изображений (get_rdy(images) просто вставьте это)
@@ -548,7 +547,6 @@ def load_var(file):
 
 
 def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
-
     """
     плюсо/минусо-мет
     (просьба не злоупотреблять этой функцией)
@@ -587,3 +585,4 @@ def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
 
 
 __author__ = "ExE"
+# Я реакторе - FEAR2K
