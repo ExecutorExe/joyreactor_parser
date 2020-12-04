@@ -521,26 +521,42 @@ def download_images(images, download_path, warn_on=True):
 
 
 def save_var_ovr(var, name="new_pkl_file"):
-    """save variable with overwrite if name exists
+    """
+    save variable with overwrite if name exists
+
+    :param var: variable
+    :param name: path/filename
+    :return: pkl file (with overwrite if exists with same name)
     """
     with open(name + ".pkl", "wb") as f:
         pickle.dump(var, f)
 
 
-def save_var(var, name="new_pkl_file", __c=""):
-    """save variable without overwrite"""
-    if os.path.isfile(name + str(__c) + ".pkl"):
-        if __c == "":
-            __c = "0"
+def save_var(var, name="new_pkl_file", __=""):
+    """
+    save variable without overwrite
+
+    :param var: variable
+    :param name: path/filename
+    :return: pkl file
+    """
+    if os.path.isfile(name + str(__) + ".pkl"):
+        if __ == "":
+            __ = "0"
         else:
-            __c = int(__c) + 1
-        save_var(var, name, __c)
+            __ = int(__) + 1
+        save_var(var, name, __)
     else:
-        save_var_ovr(var, name + str(__c))
+        save_var_ovr(var, name + str(__))
 
 
 def load_var(file):
-    """load variable"""
+    """
+    load variable
+
+    :param file: path/filename
+    :return: var data
+    """
     with open(file, "rb") as f:
         var = pickle.load(f)
     return var
