@@ -29,7 +29,6 @@ import os.path
 
 
 timeout = 1
-timeoutwarn = "<<! Ban from host warning !>>\n<<Increase timeout variable else you shall be banned !>>"
 
 # не трогать этот параметр блэт.
 # сайт может забанить на какой то промежуток если запросов больше чем определенное значение
@@ -114,7 +113,6 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
 
 
     """
-    assert (timeout < 1, timeoutwarn)
     if "reactor.cc/search" in page:
         if "q=&" in page:
             page = page.replace("q=&", "")
@@ -448,7 +446,6 @@ def download_images(images, download_path, warn_on=True):
     :param warn_on: 3 аргумент отключения предупреждений по уполчанию влючено
 
     """
-    assert (timeout < 1, timeoutwarn)
 
     def downloader(links, d_path):
 
@@ -563,7 +560,6 @@ def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
     :param abyss: понятие не имею нужен он или нет(у меня он был 0)
     :return: void
     """
-    assert (timeout < 1, timeoutwarn)
     if 'token=' in token:
         token.replace("token=", "")
     header = ({
