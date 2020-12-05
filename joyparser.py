@@ -241,7 +241,6 @@ def parser(page, from_page, until_page=0, posttext=False):
     # избавляемся от дубликатов если они есть
     # нет не мог использовать словари, патаму шо медленные и numpy one love
     lenpost = len(keys)
-    print(lenpost, len(images))
     keys, indices = np.unique(keys, return_index=True)
     for i in range(lenpost - 1, -1, -1):
 
