@@ -68,7 +68,7 @@ def page_max(page):
             raise e
 
 
-def parser(page, from_page, until_page=0, on_info=False, posttext=False):
+def parser(page, from_page, until_page=0, posttext=False):
     """
 
     Input:
@@ -85,17 +85,12 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
     -until_page -- третий аргумент получает цифру (по умолчанию 0)
 
 
-    -on_info -- пятый аргумент создает многомерный список с информацией о посте
 
-    0 - теги 1 - рейтинги 2 - дата 3 - цифорки поста 4 - кол комментов 5 - лучшие комменты
 
-    [tags,rating, date, keys, lencomments,bestcomments]
 
-    по умолчанию выключен
+    -posttext -- парсит текст поста и лучших комментов по умолчанию выключен
 
-    -posttext -- парсит текст поста
 
-    по умолчанию выключен
 
 
 
@@ -107,9 +102,9 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
 
     0 - многомерный список с картинками поста
 
-    1 - многомерный список с многомерными списками с информацией
+    1 - многомерный список с многомерными списками с информацией [tags,rating, date, keys, lencomments,bestcomments]
 
-    2 - многомерный список с текстом
+    2 - многомерный список с текстом, многомерный список с лучшими комментами [text, bestcomments]
 
 
     """
@@ -173,7 +168,6 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
 
         # block selection
         for i in soup.select(".article.post-normal"):
-            # create post number as dict key
 
             datatext = []
             if posttext:
@@ -182,36 +176,35 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
                     if io.text:
                         datatext.append(io.text)
 
-            if on_info:
-                # теги
+                        # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
+                    tempbestcom.append(info(i, '.post_comment_list > div > div'))
 
-                temptags.append(info(i, ".post_top > .taglist > b > a"))
-                # рейтинг поста
-                # temprating.append(info(i, ))
-                # temp = []
-                for ay in i.select(".ufoot > div > .post_rating > span"):
-                    # creating dict with tags
-                    try:
-                        temprating.append(float(ay.text))
-                    except ValueError as e:
-                        print(e)
-                        logging.error("<<!>>connect to VPN<<!>>")
-                        exit()
+            temptags.append(info(i, ".post_top > .taglist > b > a"))
+            # рейтинг поста
+            # temprating.append(info(i, ))
+            # temp = []
+            for ay in i.select(".ufoot > div > .post_rating > span"):
+                # creating dict with tags
+                try:
+                    temprating.append(float(ay.text))
+                except ValueError as e:
+                    print(e)
+                    logging.error("<<!>>connect to VPN<<!>>")
+                    exit()
 
-                # дата  день год месяц точное время
-                tempdate.append(info(i, ".ufoot > div > .date > span > span"))
+            # дата  день год месяц точное время
+            tempdate.append(info(i, ".ufoot > div > .date > span > span"))
 
-                # ссылка на пост
-                for ay in i.select(".ufoot > div > .link_wr > a"):
-                    tempkey.append(os.path.basename(ay["href"]))
+            # ссылка на пост
+            for ay in i.select(".ufoot > div > .link_wr > a"):
+                tempkey.append(os.path.basename(ay["href"]))
 
-                # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
-                tempbestcom.append(info(i, '.post_comment_list > div > div'))
 
-                for ay in i.select('.commentnum.toggleComments'):
-                    # creating dict with tags
 
-                    templencom.extend((re.findall(r'\d+', ay.text)))
+            for ay in i.select('.commentnum.toggleComments'):
+                # creating dict with tags
+
+                templencom.extend((re.findall(r'\d+', ay.text)))
 
             dataimage = []
             for i0 in i.select(".post_content"):
@@ -246,11 +239,27 @@ def parser(page, from_page, until_page=0, on_info=False, posttext=False):
         bestcomments.extend(tempbestcom)
         keys.extend(tempkey)
         date.extend(tempdate)
-
         time.sleep(timeout)
-    # print(temptext)
-    info = [tags, rating, date, keys, araara(lencomments).astype(dtype=int), bestcomments]
-    return images, info, txt
+    # избавляемся от дубликатов если они есть
+    # нет не мог использовать словари, патаму шо медленные и numpy one love
+    lenpost = len(keys)
+    keys, indices = np.unique(keys, return_index=True)
+    for i in range(lenpost):
+        #print(i)
+        if i not in indices:
+            del images[i]
+            del tags[i]
+            del rating[i]
+            del date[i]
+            del lencomments[i]
+            if posttext:
+                del bestcomments[i]
+                del txt[i]
+
+    return images, \
+           [tags, rating, date, keys,
+            araara(lencomments).astype(dtype=int)],\
+           [txt,bestcomments]
 
 
 # Saving the objects:
