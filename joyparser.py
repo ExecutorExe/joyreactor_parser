@@ -199,8 +199,6 @@ def parser(page, from_page, until_page=0, posttext=False):
             for ay in i.select(".ufoot > div > .link_wr > a"):
                 tempkey.append(os.path.basename(ay["href"]))
 
-
-
             for ay in i.select('.commentnum.toggleComments'):
                 # creating dict with tags
 
@@ -245,7 +243,7 @@ def parser(page, from_page, until_page=0, posttext=False):
     lenpost = len(keys)
     keys, indices = np.unique(keys, return_index=True)
     for i in range(lenpost):
-        #print(i)
+        # print(i)
         if i not in indices:
             del images[i]
             del tags[i]
@@ -258,11 +256,8 @@ def parser(page, from_page, until_page=0, posttext=False):
 
     return images, \
            [tags, rating, date, keys,
-            araara(lencomments).astype(dtype=int)],\
-           [txt,bestcomments]
-
-
-# Saving the objects:
+            araara(lencomments).astype(dtype=int)], \
+           [txt, bestcomments]
 
 
 def sort_by_rate_comments(linksbase, info_index, rating=0):
