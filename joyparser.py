@@ -155,7 +155,7 @@ def parser(page, from_page, until_page=0, posttext=False):
         else:
             page_ind = page + "/" + str(from_page)
 
-            print(page_ind)
+            print("<< pages left:", from_page, ">>")
         soup = bs(getpage(page_ind, from_page).content, "html.parser")
 
         temptext = []
