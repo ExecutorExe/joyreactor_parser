@@ -261,7 +261,6 @@ def parser(page, from_page, until_page=0, posttext=False):
            [txt, bestcomments]
 
 
-
 def get_val_by_index(value, index):
     """
     возвращает элементы по индексу
@@ -322,7 +321,6 @@ def except_tag(info=list, tagexceptions=list, spike=None):
             sortedlist.append(i)
 
     return araara(sortedlist)
-
 
 
 def sort_by_tag(info=list, tagexceptions=list, spike=None):
@@ -556,7 +554,7 @@ __author__ = "ExE"
 # Я реакторе - FEAR2K
 
 
-#legacy
+# legacy
 
 #
 # def sort_by_rate_comments(linksbase, info_index, rating=0):
