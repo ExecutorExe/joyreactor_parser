@@ -133,7 +133,7 @@ def parser(page, from_page, until_page=0, posttext=False):
             # try again
             return getpage(page, from_page)
 
-    def info(i, path):
+    def get_info(i, path):
         temp = []
         for ay in i.select(path):
             # creating dict with tags
@@ -177,9 +177,9 @@ def parser(page, from_page, until_page=0, posttext=False):
                         datatext.append(io.text)
 
                         # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
-                    tempbestcom.append(info(i, '.post_comment_list > div > div'))
+                    tempbestcom.append(get_info(i, '.post_comment_list > div > div'))
 
-            temptags.append(info(i, ".post_top > .taglist > b > a"))
+            temptags.append(get_info(i, ".post_top > .taglist > b > a"))
             # рейтинг поста
             # temprating.append(info(i, ))
             # temp = []
@@ -193,7 +193,7 @@ def parser(page, from_page, until_page=0, posttext=False):
                     exit()
 
             # дата  день год месяц точное время
-            tempdate.append(info(i, ".ufoot > div > .date > span > span"))
+            tempdate.append(get_info(i, ".ufoot > div > .date > span > span"))
 
             # ссылка на пост
             for ay in i.select(".ufoot > div > .link_wr > a"):
