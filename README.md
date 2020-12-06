@@ -14,7 +14,7 @@ parser(page, from_page, until_page=0, on_text_tags=False, on_info=False)
 - from_page - Второй аргумент получает цифру от какой страницы сканировать
 
 
-- until_page - Третий аргумент получает цифру (по умолчанию 0)
+- until_page - Третий аргумент получает цифру до какой страницы сканировать (по умолчанию 0)
 
 
 - posttext -- парсит текст поста и лучшие комменты
@@ -32,7 +32,7 @@ return images, info, txt
 -- 2 - многомерный список с текстом и лучшими комментами
 
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-sort_by_tag(info=list, tagexceptions=list, spike=None):
+sort_by_tag(info=list, tagexceptions=list, spike=None)
      индекс тегов - info[0]
 
 
@@ -46,9 +46,9 @@ sort_by_tag(info=list, tagexceptions=list, spike=None):
    -- возвращает новый отсортированный список индексов
     
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-def except_tag(info=list, tagexceptions=list, spike=None):
-    """
-    индекс тегов - info[0]
+def except_tag(info=list, tagexceptions=list, spike=None)
+    
+   индекс тегов - info[0]
 
  - info: принемает масив с информацией
  
@@ -59,9 +59,9 @@ def except_tag(info=list, tagexceptions=list, spike=None):
     
  -- возвращает индексы
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-def sort_by_rate_comments(info_index, rating=0):
-    """
-    Рейтинг = imfo[1] | Комменты - imfo[4]
+def sort_by_rate_comments(info_index, rating=0)
+    
+   Рейтинг = imfo[1] | Комменты - imfo[4]
 
  - info: 1 аргумент переменная с информацией
  
@@ -77,7 +77,7 @@ def get_val_by_index(value, index):
  
  - index: индексы
  
- -- сортированный массив
+ -- сортированный массив с индексами
     
 
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -85,7 +85,6 @@ get_rdy(images)
 
 - Принимает переменную с картинками после парса или после сортировки
 
-Она просто переводит все ссылки в массив
 
 -- Возвращает numpy array 1d
 
@@ -123,15 +122,16 @@ save_var(var, name="new_pkl_file", __c=""):
 
 load_var(file)
 
--загружает переменную
--  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+- загружает переменную
+
 
 # Требования
 Советую использовать conda 
 
 - python 3.7
 
-- requirements.txt
+- [requirements.txt](https://github.com/ExecutorExe/joyparser/blob/master/requirements.txt)
+
 
 # Пример использования
 
