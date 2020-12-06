@@ -260,27 +260,7 @@ def parser(page, from_page, until_page=0, posttext=False):
             araara(lencomments).astype(dtype=int)], \
            [txt, bestcomments]
 
-#
-# def sort_by_rate_comments(linksbase, info_index, rating=0):
-#     """
-#     Рейтинг = imfo[1] | Комменты - imfo[4]
-#
-#
-#     :param linksbase: 1 аргумент это что надо отсартировать картинки/текст
-#     :param info: 2 аргумент переменная с информацией
-#     :param rating: 3 аргумент - цифра, ниже этого значения посты не пройдут
-#     :return: список с удаленными в них постами ниже определенного рейтинга
-#     """
-#
-#     sorted_links = []
-#     idexes = np.argsort(info_index)[::-1]
-#     for i, v in enumerate(araara(info_index)[idexes]):
-#         if v < rating:
-#             break
-#         sorted_links.append(linksbase[idexes[i]])
-#
-#     return sorted_links
-#
+
 
 def get_val_by_index(value, index):
     """
@@ -317,33 +297,6 @@ def sort_by_rate_comments(info_index, rating=0):
         return idexes[:ind]
 
 
-#
-# def except_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
-#     """
-#
-#     :param linkbase: принемает многомрный список изображений/текста
-#     :param info: принемает масив с информацией
-#     :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
-#     :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
-#     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
-#     :return: возвращает новый отсортированный список
-#     """
-#     if spike is None:
-#         spike = len(tagexceptions)
-#
-#     sortedlist = []
-#     print(len(linkbase),len(info))
-#     for i, v in enumerate(info):
-#         counter = 0
-#         for i0 in tagexceptions:
-#             if i0 in v:
-#                 counter = counter + 1
-#         if not counter >= spike:
-#             sortedlist.append(linkbase[i])
-#
-#     return sortedlist
-#
-
 def except_tag(info=list, tagexceptions=list, spike=None):
     """
     индекс тегов - info[0]
@@ -370,33 +323,6 @@ def except_tag(info=list, tagexceptions=list, spike=None):
 
     return araara(sortedlist)
 
-
-#
-# def sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
-#     """
-#
-#     :param linkbase: принемает многомрный список изображений/текста
-#     :param info: принемает масив с информацией
-#     :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
-#     :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
-#     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
-#     :return: возвращает новый отсортированный список
-#
-#     """
-#     if spike is None:
-#         spike = len(tagexceptions)
-#
-#     sortedlist = []
-#
-#     for i, v in enumerate(info):
-#         counter = 0
-#         for i0 in tagexceptions:
-#             if i0 in v:
-#                 counter = counter + 1
-#             if counter == spike:
-#                 sortedlist.append(linkbase[i])
-#                 break
-#     return sortedlist
 
 
 def sort_by_tag(info=list, tagexceptions=list, spike=None):
@@ -628,3 +554,81 @@ def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
 
 __author__ = "ExE"
 # Я реакторе - FEAR2K
+
+
+#legacy
+
+#
+# def sort_by_rate_comments(linksbase, info_index, rating=0):
+#     """
+#     Рейтинг = imfo[1] | Комменты - imfo[4]
+#
+#
+#     :param linksbase: 1 аргумент это что надо отсартировать картинки/текст
+#     :param info: 2 аргумент переменная с информацией
+#     :param rating: 3 аргумент - цифра, ниже этого значения посты не пройдут
+#     :return: список с удаленными в них постами ниже определенного рейтинга
+#     """
+#
+#     sorted_links = []
+#     idexes = np.argsort(info_index)[::-1]
+#     for i, v in enumerate(araara(info_index)[idexes]):
+#         if v < rating:
+#             break
+#         sorted_links.append(linksbase[idexes[i]])
+#
+#     return sorted_links
+
+#
+# def sort_by_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
+#     """
+#
+#     :param linkbase: принемает многомрный список изображений/текста
+#     :param info: принемает масив с информацией
+#     :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
+#     :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
+#     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
+#     :return: возвращает новый отсортированный список
+#
+#     """
+#     if spike is None:
+#         spike = len(tagexceptions)
+#
+#     sortedlist = []
+#
+#     for i, v in enumerate(info):
+#         counter = 0
+#         for i0 in tagexceptions:
+#             if i0 in v:
+#                 counter = counter + 1
+#             if counter == spike:
+#                 sortedlist.append(linkbase[i])
+#                 break
+#     return sortedlist
+
+#
+# def except_tag(linkbase=list, info=list, tagexceptions=list, spike=None):
+#     """
+#
+#     :param linkbase: принемает многомрный список изображений/текста
+#     :param info: принемает масив с информацией
+#     :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
+#     :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
+#     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
+#     :return: возвращает новый отсортированный список
+#     """
+#     if spike is None:
+#         spike = len(tagexceptions)
+#
+#     sortedlist = []
+#     print(len(linkbase),len(info))
+#     for i, v in enumerate(info):
+#         counter = 0
+#         for i0 in tagexceptions:
+#             if i0 in v:
+#                 counter = counter + 1
+#         if not counter >= spike:
+#             sortedlist.append(linkbase[i])
+#
+#     return sortedlist
+#
