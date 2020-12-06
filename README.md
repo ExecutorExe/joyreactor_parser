@@ -33,7 +33,7 @@ return images, info, txt
 
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 sort_by_tag(info=list, tagexceptions=list, spike=None):
-    
+     индекс тегов - info[0]
 
 
    - info: принемает масив с информацией
@@ -48,6 +48,7 @@ sort_by_tag(info=list, tagexceptions=list, spike=None):
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 def except_tag(info=list, tagexceptions=list, spike=None):
     """
+    индекс тегов - info[0]
 
  - info: принемает масив с информацией
  
@@ -150,5 +151,5 @@ from_page = 1
 
 linksbase, info, txt = jp.parser(page, from_page, 0, on_info=True)
 
-jp.download_images(jp.get_rdy(jp.sort_by_rate_comments(linksbase, info[1], 0)), download_path=d_path)
+jp.download_images(jp.get_rdy(jp.get_val_by_index(linkbase,jp.sort_by_rate_comments(info[1], download_path=d_path)
 ```
