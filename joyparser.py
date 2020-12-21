@@ -255,10 +255,10 @@ def parser(page, from_page, until_page=0, posttext=False):
                 del bestcomments[i]
                 del txt[i]
     # print(len(images),len(tags), len(rating),len(date),len(lencomments))
-    return images, \
-           [tags, rating, date, keys,
-            araara(lencomments).astype(dtype=int)], \
-           [txt, bestcomments]
+    return np.array(images,dtype=object), \
+           np.array([tags, rating, date, keys,
+            araara(lencomments).astype(dtype=int)],dtype=object), \
+           np.array([txt, bestcomments],dtype=object)
 
 
 def get_val_by_index(value, index):
@@ -285,7 +285,7 @@ def sort_by_rate_comments(info_index, rating=0):
     ind = None
     idexes = np.argsort(info_index)[::-1]
     for i, v in enumerate(araara(info_index)[idexes]):
-        print(v)
+
         if v < rating:
             ind = i
             break
