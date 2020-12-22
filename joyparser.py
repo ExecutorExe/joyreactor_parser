@@ -551,7 +551,7 @@ def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
 
 
 __author__ = "ExE"
-# Я реакторе - FEAR2K
+# Я реакторе - FEAR2k
 
 
 # legacy
