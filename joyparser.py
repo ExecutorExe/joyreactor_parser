@@ -190,7 +190,11 @@ def parser(page, from_page, until_page=0, posttext=False):
                 except ValueError as e:
                     print(e)
                     logging.error("<<!>>connect to VPN<<!>>")
-                    exit()
+                    input("><to reconnect type anything><")
+
+                    # try again
+                    return parser(page, from_page, until_page, posttext)
+                    #exit()
 
             # дата  день год месяц точное время
             tempdate.append(get_info(i, ".ufoot > div > .date > span > span"))
