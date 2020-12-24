@@ -53,7 +53,7 @@ from_page = 1
 # от какой страницы | например http://joyreactor.cc/user/котэ/35 
 # или воспользуйтесь jp.page_max(page) эта функция вернет максимальное количество страниц
 
-img, info, txt = jp.parser(page, from_page, 0)
+img, info, txt = jp.parser(page, from_page, till_page)
 
 jp.download_images(jp.get_rdy(img[jp.sort_by_rate_comments(info[1],10)]),download_path=d_path)
 
