@@ -90,7 +90,7 @@ print(value[jp.sort_by_tag(value,[1,2,44],spike=1)])
 # [11 22 33 44]]
 ```
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-def except_tag(info=list, tagexceptions=list, spike=None)
+except_tag(info=list, tagexceptions=list, spike=None)
     
    индекс тегов - info[0]
 
@@ -105,7 +105,7 @@ def except_tag(info=list, tagexceptions=list, spike=None)
  
  Все тоже самое что и sort_by_tag просто исключения тегов
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-def sort_by_rate_comments(info_index, rating=0)
+sort_by_rate_comments(info_index, rating=0)
     
    Рейтинг = imfo[1] | Комменты - imfo[4]
 
@@ -138,7 +138,7 @@ print(value[np.where(indexes>=6)])
 # [111 222 333 444]]
 ```
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-def get_val_by_index(value, index):
+get_val_by_index(value, index):
     
    возвращает элементы по индексу
 
@@ -179,7 +179,7 @@ download_images(images, download_path, warn_on=True)
 
 - 3 аргумент отключения предупреждений по уполчанию влючено True/False
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-def votegun(posts_array, cookie, token, vote=True, __abyss="0")
+votegun(posts_array, cookie, token, vote=True, __abyss="0")
 
 плюсо/минусо-мет
 (просьба не злоупотреблять этой функцией)
@@ -205,6 +205,18 @@ load_var(file)
 
 - загружает переменную
 
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
+parse_user_tag_list(user_page)
+
+Парсит подписки юзера
+
+- page страница пользователя
+
+- fullname отключает basename
+
+-- возвращает narray
+
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 

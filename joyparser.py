@@ -371,22 +371,43 @@ def get_rdy(images):
         return []
 
 
-def parse_user_tag_list(page):
+def parse_user_tag_list(page,fullname=False):
+    """
+    парсит подписки (теги) юзера
+
+    :param page: user page /user/username
+    :param fullname: разрешить полные имена (отключает basename)
+    :return: narray
+    """
     temp = []
-    try:
-        # s = rq.Session()
-        soup = bs(rq.get(page).content, "html.parser")
-        for i in soup.select(".sidebar_block.blogs_wr > .sidebarContent"):
-            for i0 in i.findAll(["a"]):
-                temp.append(os.path.basename(urllib.parse.unquote(i0["href"])))
-        return temp
-    except ConnectionError:
-        print("<<!alert, connection error!>>")
-        # sleep for a bit in case that helps
-        # try again
-        time.sleep(2)
-        print("<<trying to reconnect>>")
-        return page_max(page)
+    if fullname:
+        try:
+            soup = bs(rq.get(page).content, "html.parser")
+            for i in soup.select(".sidebar_block.blogs_wr > .sidebarContent"):
+                for i0 in i.findAll(["a"]):
+                    temp.append(urllib.parse.unquote(i0["href"]))
+            return np.array(temp)
+        except ConnectionError:
+            print("<<!alert, connection error!>>")
+            # sleep for a bit in case that helps
+            # try again
+            time.sleep(2)
+            print("<<trying to reconnect>>")
+            return parse_user_tag_list(page,fullname)
+    else:
+        try:
+            soup = bs(rq.get(page).content, "html.parser")
+            for i in soup.select(".sidebar_block.blogs_wr > .sidebarContent"):
+                for i0 in i.findAll(["a"]):
+                    temp.append(os.path.basename(urllib.parse.unquote(i0["href"])))
+            return np.array(temp)
+        except ConnectionError:
+            print("<<!alert, connection error!>>")
+            # sleep for a bit in case that helps
+            # try again
+            time.sleep(2)
+            print("<<trying to reconnect>>")
+            return parse_user_tag_list(page,fullname)
 
 
 def download_images(images, download_path, warn_on=True):
