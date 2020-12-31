@@ -62,10 +62,23 @@ def page_max(page):
         print("<<trying to reconnect>>")
         return page_max(page)
     except ValueError as e:
-        if "/post/" in page or "/tag/" in page or "/user/" in page:
+        if "/post/" in page or "/tag/" in page or "/user/" in page or "/search/" in page:
             return 1
         else:
             raise e
+
+
+def search(search=[],tags=[],user=[]):
+    """
+    Делает поиск
+
+    :param search: просто поиск хз как он работает list
+    :param tags: теги list
+    :param user: пользователь list
+    :return: page str
+    """
+    return "http://joyreactor.cc/search?q={}".format("%2C+".join(search))+\
+           "&user={}".format("%2C+".join(user))+"&tags="+"{}".format("%2C+".join(tags))+"&"
 
 
 def parser(page, from_page, until_page=0, posttext=False):
