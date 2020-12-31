@@ -68,16 +68,17 @@ def page_max(page):
             raise e
 
 
-def search(search=[],tags=[],user=[]):
+def search(base="joyreactor",search=[],tags=[],user=[]):
     """
     Делает поиск
-
+    
+	:param base: базовое имя фендом и т.д
     :param search: просто поиск хз как он работает list
     :param tags: теги list
     :param user: пользователь list
     :return: page str
     """
-    return "http://joyreactor.cc/search?q={}".format("%2C+".join(search))+\
+    return "http://"+base+".cc/search?q={}".format("%2C+".join(search))+\
            "&user={}".format("%2C+".join(user))+"&tags="+"{}".format("%2C+".join(tags))+"&"
 
 
