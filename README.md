@@ -207,7 +207,7 @@ load_var(file)
 
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
-parse_user_tag_list(user_page)
+parse_user_tag_list(user_page, fullname=False)
 
 Парсит подписки юзера
 
