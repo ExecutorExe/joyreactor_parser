@@ -14,27 +14,101 @@ import pickle
 import os.path
 
 # внимание, скорость монижена для того что бы не перегружать сервера сайта
-
-# можно делать запросы следующим образом:
-# http://joyreactor.cc/search?q=&user=&tags=котэ%2C+
-# в этом запросе выводятся все посты где присудствует тэг "котэ" (но это не точно)
-# запросы пишутся после "=", где:
-# q - поиск(хз как он работает)
-# user - автор поста
-# tags - тэги (самый полезный запрос, выведутся  посты которые содержат данные теги)
-# тэги пишутся через запятую где запятая в запросе это: %2C+
-# обратите внимание что запросы начинаются с 1
-# в отличие от конкретных тегов таких как joyreactor.cc/tag/котэ
-# конкретные теги смотри на реакторе и в его фендомах (они раздиляются)
-
-
 timeout = 1
-
 
 # не трогать этот параметр блэт.
 # сайт может забанить на какой то промежуток если запросов больше чем определенное значение
 # если бы не это, то я бы использовал multiprocessing
+np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+messages = np.array(["<<!alert, connection error!>>",
+                     "><to reconnect type anything><",
+                     "<<trying to reconnect>>",
+                     "<<files does not found>>"])
 
+
+# DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
+
+def downloader(links, d_path,warn_on):
+    # это данные которые передаются при запросе к link
+    # таким образом я избавляюсь от ватермарки сайта
+
+    request = ({
+        'Host': 'img10.reactor.cc',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0',
+        'Accept': 'image/webp,*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Referer': 'http://joyreactor.cc/',
+        'Connection': 'keep-alive',
+
+        'Cache-Control': 'max-age=0',
+        'Pragma': 'no-cache'
+    })
+
+    counter = int(len(links))
+
+    # функция если у вас проблемы с интеренетом
+
+    for Im_link in links:  # итерация хуяция
+        if warn_on:
+            print("<< files left:", counter, ">>")
+        counter = counter - 1
+
+        path_FileBaseName = d_path + os.sep + os.path.basename(Im_link)
+        # проверяем существует ли файл в диооектории
+
+        if not os.path.exists(path_FileBaseName):
+
+            getimage(Im_link, request, path_FileBaseName,warn_on)
+        else:
+            if warn_on:
+                print("<<!File (" + os.path.basename(Im_link) + ") already existing in dir (" + d_path + ")!>>")
+
+
+def getpage(page, from_page):
+    try:
+        # s = rq.Session(page)
+        # getting url
+        url = rq.get(page)
+        return url
+    except ConnectionError:
+        print(messages[0])
+        # sleep for a bit in case that helps
+        input(messages[1])
+
+        # try again
+        return getpage(page, from_page)
+
+
+def get_info(i, path):
+    temp = []
+    for ay in i.select(path):
+        # creating dict with tags
+        temp.append(ay.text)
+    return temp
+
+
+def getimage(Im_link, request, path_FileBaseName, warn_on):
+    try:
+        time.sleep(timeout)  # don't touch it coz ping need to not overload website or get frecking ban
+        # не трогать задержка нужна что бы не перегружать вэбсайт и не получить ебаный бан от сайта
+        with open(path_FileBaseName, 'wb') as f:  # открываем файл
+            f.write(rq.get(Im_link, headers=request).content)
+            # делаем запрос на получение файла
+
+    except ConnectionError as e:
+        if warn_on:
+
+            print(messages[0])
+            # sleep for a bit in case that helps
+            input(messages[1])
+            # try again
+            return getimage(Im_link, request, path_FileBaseName, warn_on)
+        else:
+            raise e
+
+
+# END_DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
 
 def page_max(page):
     """
@@ -55,11 +129,11 @@ def page_max(page):
 
         return max(temp)
     except ConnectionError:
-        print("<<!alert, connection error!>>")
+        print(messages[0])
         # sleep for a bit in case that helps
         # try again
         time.sleep(2)
-        print("<<trying to reconnect>>")
+        print(messages[2])
         return page_max(page)
     except ValueError as e:
         if "/post/" in page or "/tag/" in page or "/user/" in page or "/search/" in page:
@@ -68,22 +142,45 @@ def page_max(page):
             raise e
 
 
-def search(base="joyreactor",search=[],tags=[],user=[]):
+def search(base="joyreactor", search=[], tags=[], user=[]):
     """
     Делает поиск
-    
+
+    # можно делать запросы следующим образом:
+
+    # http://joyreactor.cc/search?q=&user=&tags=котэ%2C+
+
+    # в этом запросе выводятся все посты где присудствует тэг "котэ" (но это не точно)
+
+    # запросы пишутся после "=", где:
+
+    # q - поиск(хз как он работает)
+
+    # user - автор поста
+
+    # tags - тэги (самый полезный запрос, выведутся  посты которые содержат данные теги)
+
+    # тэги пишутся через запятую где запятая в запросе это: %2C+
+
+    # обратите внимание что запросы начинаются с 1
+
+    # в отличие от конкретных тегов таких как joyreactor.cc/tag/котэ
+
+    # конкретные теги смотри на реакторе и в его фендомах (они раздиляются)
+
 	:param base: базовое имя фендом и т.д
     :param search: просто поиск хз как он работает list
     :param tags: теги list
     :param user: пользователь list
     :return: page str
     """
-    return "http://"+base+".cc/search?q={}".format("%2C+".join(search))+\
-           "&user={}".format("%2C+".join(user))+"&tags="+"{}".format("%2C+".join(tags))+"&"
+    return "http://" + base + ".cc/search?q={}".format("%2C+".join(search)) + \
+           "&user={}".format("%2C+".join(user)) + "&tags=" + "{}".format("%2C+".join(tags)) + "&"
 
 
-def parser(page, from_page, until_page=0, posttext=False):
+def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_array=None):
     """
+    парсер может сканировать теги or основные страницы по типу best or юзеров одиночные посты or поисковые запросы
 
     Input:
     ------
@@ -93,22 +190,13 @@ def parser(page, from_page, until_page=0, posttext=False):
     "://" обязателен, на конце не должно быть "/"
     например http://joyreactor.cc/tag/Sakimichan
 
-    from_page -- второй аргумент получает цифру от какой страницы сканировать
-
+    -from_page -- второй аргумент получает цифру от какой страницы сканировать
 
     -until_page -- третий аргумент получает цифру (по умолчанию 0)
 
+    -posttext -- парсит текст поста и лучших комментов по умолчанию выключен(не обязательный аргумент)
 
-
-
-
-    -posttext -- парсит текст поста и лучших комментов по умолчанию выключен
-
-
-
-
-
-
+    -update_parsed_array принимает уже отпарсеный список и обновит до первого совпавшего поста(не обязательный аргумент)
 
     Output:
     -------
@@ -122,7 +210,16 @@ def parser(page, from_page, until_page=0, posttext=False):
 
 
     """
-    if "reactor.cc/search" in page:
+
+    if update_parsed_array is None:
+        upd = False
+    else:
+        upd = True
+
+    if from_page == int:  # default setting if no custom numbers
+        from_page = page_max(page)
+
+    if "reactor.cc/search" in page:  # if search
         if "q=&" in page:
             page = page.replace("q=&", "")
         if "user=&" in page:
@@ -133,26 +230,6 @@ def parser(page, from_page, until_page=0, posttext=False):
         search = False
 
     # сразу извиняюсь, на этом проекте я учился использовать bs4(я не читал док)
-    def getpage(page, from_page):
-        try:
-            # s = rq.Session(page)
-            # getting url
-            url = rq.get(page)
-            return url
-        except ConnectionError:
-            print("<<!alert, connection error!>>")
-            # sleep for a bit in case that helps
-            input("><to reconnect type anything><")
-
-            # try again
-            return getpage(page, from_page)
-
-    def get_info(i, path):
-        temp = []
-        for ay in i.select(path):
-            # creating dict with tags
-            temp.append(ay.text)
-        return temp
 
     rating = []
     date = []
@@ -162,6 +239,24 @@ def parser(page, from_page, until_page=0, posttext=False):
     txt = []
     images = []
     tags = []
+
+    def prep(keys):
+        lenpost = len(keys)
+
+        keys, indices = np.unique(keys, return_index=True)
+        for i in range(lenpost - 1, -1, -1):
+
+            if i not in indices:
+
+                del images[i]
+                del tags[i]
+                del rating[i]
+                del date[i]
+                del lencomments[i]
+                if posttext:
+                    del bestcomments[i]
+                    del txt[i]
+        # print(len(images),len(tags), len(rating),len(date),len(lencomments))
 
     while not from_page == until_page:
         if search:
@@ -208,7 +303,7 @@ def parser(page, from_page, until_page=0, posttext=False):
 
                     # try again
                     return parser(page, from_page, until_page, posttext)
-                    #exit()
+                    # exit()
 
             # дата  день год месяц точное время
             tempdate.append(get_info(i, ".ufoot > div > .date > span > span"))
@@ -247,36 +342,49 @@ def parser(page, from_page, until_page=0, posttext=False):
             temptext.append(datatext)
 
         from_page -= 1
+        if upd:
+            for post_number in range(len(tempkey)):
+                if tempkey[post_number] in update_parsed_array[1][3]:
+                    print("upd")
+                    prep(keys)
 
-        rating.extend(temprating)
-        lencomments.extend(templencom)
-        txt.extend(temptext)
-        tags.extend(temptags)
-        bestcomments.extend(tempbestcom)
-        keys.extend(tempkey)
-        date.extend(tempdate)
-        time.sleep(timeout)
+                    return np.append(images, update_parsed_array[0]), \
+                           np.array([np.append(tags, update_parsed_array[1][0]),
+                                     np.append(rating, update_parsed_array[1][1]),
+                                     np.append(date, update_parsed_array[1][2]),
+                                     np.append(keys, update_parsed_array[1][3]),
+                                     np.append(np.array(lencomments).astype(dtype=int), update_parsed_array[1][4])],
+                                    dtype=object), \
+                           np.array([np.append(txt, update_parsed_array[2][0]),
+                                     np.append(bestcomments, update_parsed_array[2][1])], dtype=object)
+
+                else:
+                    rating.append(temprating[post_number])
+                    lencomments.append(templencom[post_number])
+                    txt.append(temptext[post_number])
+                    tags.append(temptags[post_number])
+                    bestcomments.append(tempbestcom[post_number])
+                    keys.append(tempkey[post_number])
+                    date.append(tempdate[post_number])
+            time.sleep(timeout)
+
+        else:
+            rating.extend(temprating)
+            lencomments.extend(templencom)
+            txt.extend(temptext)
+            tags.extend(temptags)
+            bestcomments.extend(tempbestcom)
+            keys.extend(tempkey)
+            date.extend(tempdate)
+            time.sleep(timeout)
+
     # избавляемся от дубликатов если они есть
     # нет не мог использовать словари, патаму шо медленные и numpy one love
-    lenpost = len(keys)
-    keys, indices = np.unique(keys, return_index=True)
-    for i in range(lenpost - 1, -1, -1):
-
-        if i not in indices:
-
-            del images[i]
-            del tags[i]
-            del rating[i]
-            del date[i]
-            del lencomments[i]
-            if posttext:
-                del bestcomments[i]
-                del txt[i]
-    # print(len(images),len(tags), len(rating),len(date),len(lencomments))
-    return np.array(images,dtype=object), \
-           np.array([tags, rating, date, keys,
-            araara(lencomments).astype(dtype=int)],dtype=object), \
-           np.array([txt, bestcomments],dtype=object)
+    prep(keys)
+    return \
+        np.array(images, dtype=object), \
+        np.array([tags, rating, date, keys, np.array(lencomments).astype(dtype=int)], dtype=object), \
+        np.array([txt, bestcomments], dtype=object)
 
 
 def get_val_by_index(value, index):
@@ -290,7 +398,7 @@ def get_val_by_index(value, index):
     return np.array(value, dtype=object)[index]
 
 
-def sort_by_rate_comments(info_index, rating=0):
+def sort_by_rate_comments(val, rating=0):
     """
     Рейтинг = imfo[1] | Комменты - imfo[4]
 
@@ -301,8 +409,8 @@ def sort_by_rate_comments(info_index, rating=0):
     :return: отсортированные индексы
     """
     ind = None
-    idexes = np.argsort(info_index)[::-1]
-    for i, v in enumerate(araara(info_index)[idexes]):
+    idexes = np.argsort(val)[::-1]
+    for i, v in enumerate(araara(val)[idexes]):
 
         if v < rating:
             ind = i
@@ -312,6 +420,18 @@ def sort_by_rate_comments(info_index, rating=0):
         return idexes
     else:
         return idexes[:ind]
+
+
+def n_sort_by_rate_comments(val, rating=0):
+    """
+    Рейтинг = imfo[1] | Комменты - imfo[4]
+
+
+    :param info: 1 аргумент переменная с информацией
+    :param rating: 2 аргумент - цифра, ниже этого значения посты не пройдут
+    :return: отсортированные индексы
+    """
+    return val[np.where(val >= rating)]
 
 
 def except_tag(info=list, tagexceptions=list, spike=None):
@@ -385,7 +505,7 @@ def get_rdy(images):
         return []
 
 
-def parse_user_tag_list(page,fullname=False):
+def parse_user_tag_list(page, fullname=False):
     """
     парсит подписки (теги) юзера
 
@@ -402,12 +522,12 @@ def parse_user_tag_list(page,fullname=False):
                     temp.append(urllib.parse.unquote(i0["href"]))
             return np.array(temp)
         except ConnectionError:
-            print("<<!alert, connection error!>>")
+            print(messages[0])
             # sleep for a bit in case that helps
             # try again
             time.sleep(2)
-            print("<<trying to reconnect>>")
-            return parse_user_tag_list(page,fullname)
+            print(messages[2])
+            return parse_user_tag_list(page, fullname)
     else:
         try:
             soup = bs(rq.get(page).content, "html.parser")
@@ -416,12 +536,12 @@ def parse_user_tag_list(page,fullname=False):
                     temp.append(os.path.basename(urllib.parse.unquote(i0["href"])))
             return np.array(temp)
         except ConnectionError:
-            print("<<!alert, connection error!>>")
+            print(messages[0])
             # sleep for a bit in case that helps
             # try again
             time.sleep(2)
-            print("<<trying to reconnect>>")
-            return parse_user_tag_list(page,fullname)
+            print(messages[2])
+            return parse_user_tag_list(page, fullname)
 
 
 def download_images(images, download_path, warn_on=True):
@@ -435,78 +555,23 @@ def download_images(images, download_path, warn_on=True):
 
     """
 
-    def downloader(links, d_path):
-
-        # это данные которые передаются при запросе к link
-        # таким образом я избавляюсь от ватермарки сайта
-
-        request = ({
-            'Host': 'img10.reactor.cc',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0',
-            'Accept': 'image/webp,*/*',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Referer': 'http://joyreactor.cc/',
-            'Connection': 'keep-alive',
-
-            'Cache-Control': 'max-age=0',
-            'Pragma': 'no-cache'
-        })
-
-        counter = int(len(links))
-
-        # функция если у вас проблемы с интеренетом
-        def getimage(Im_link, request, path_FileBaseName):
-            try:
-                time.sleep(timeout)  # don't touch it coz ping need to not overload website or get frecking ban
-                # не трогать задержка нужна что бы не перегружать вэбсайт и не получить ебаный бан от сайта
-                with open(path_FileBaseName, 'wb') as f:  # открываем файл
-                    f.write(rq.get(Im_link, headers=request).content)
-                    # делаем запрос на получение файла
-
-            except ConnectionError as e:
-                if warn_on:
-
-                    print("<<!alert, connection error!>>")
-                    # sleep for a bit in case that helps
-                    input("><to reconnect type anything><")
-                    # try again
-                    return getimage(Im_link, request, path_FileBaseName)
-                else:
-                    raise e
-
-        for Im_link in links:  # итерация хуяция
-            if warn_on:
-                print("<< files left:", counter, ">>")
-            counter = counter - 1
-
-            path_FileBaseName = d_path + os.sep + os.path.basename(Im_link)
-            # проверяем существует ли файл в диооектории
-
-            if not os.path.exists(path_FileBaseName):
-
-                getimage(Im_link, request, path_FileBaseName)
-            else:
-                if warn_on:
-                    print("<<!File (" + os.path.basename(Im_link) + ") already existing in dir (" + d_path + ")!>>")
-
     # эта функция интуитивно понятна
     if warn_on:
         if len(images) == 0:
-            print("<<files does not found>>")
+            print(messages[3])
         else:
             print("\n<<Download", len(images), "files?>>\n")
             x = input("><Proceed ([y]/n)?><")
             if x.lower() == "y":
-                downloader(images, download_path)
+                downloader(images, download_path,warn_on)
             elif x.lower() == "n":
                 print("<<exiting>>")
             else:
                 print("><!Input value is incorrect, try again.!><\n[y - Yes]\n[n - No]")
-                download_images(images, download_path)
+                download_images(images, download_path,warn_on)
 
     else:
-        downloader(images, download_path)
+        downloader(images, download_path,warn_on)
 
 
 def save_var_ovr(var, name="new_pkl_file"):
@@ -589,7 +654,12 @@ def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
         time.sleep(timeout)
 
 
+def parse_user_comments(userpage):
+    pass
+
+
 __author__ = "ExE"
+__version__ = "1.0.5"
 # Я реакторе - FEAR2k
 
 
