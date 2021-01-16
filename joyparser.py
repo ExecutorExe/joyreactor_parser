@@ -703,8 +703,13 @@ def get_tags(t="s", till=101):
             x = len(posts_c)
             for count in range(x - 5, 0, -1):
                 if posts_c[count] == "(":
-                    tmp_p_count.append(posts_c[count + 1:-5])
+                    try:
+                        x = posts_c[count + 1:-5]
+                        tmp_p_count.append(int(x))
+                    except ValueError:
+                        tmp_p_count.append(0)
                     break
+        time.sleep(timeout)
     return np.array([tmpname,
                      np.array(tmp_p_count, dtype=np.int),
                      np.array(tmpsub, dtype=np.int),
