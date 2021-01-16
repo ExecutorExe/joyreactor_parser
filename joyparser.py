@@ -28,7 +28,7 @@ messages = np.array(["<<!alert, connection error!>>",
 
 # DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
 
-def downloader(links, d_path,warn_on):
+def downloader(links, d_path, warn_on):
     # это данные которые передаются при запросе к link
     # таким образом я избавляюсь от ватермарки сайта
 
@@ -59,13 +59,13 @@ def downloader(links, d_path,warn_on):
 
         if not os.path.exists(path_FileBaseName):
 
-            getimage(Im_link, request, path_FileBaseName,warn_on)
+            getimage(Im_link, request, path_FileBaseName, warn_on)
         else:
             if warn_on:
                 print("<<!File (" + os.path.basename(Im_link) + ") already existing in dir (" + d_path + ")!>>")
 
 
-def getpage(page, from_page):
+def getpage(page):
     try:
         # s = rq.Session(page)
         # getting url
@@ -77,7 +77,7 @@ def getpage(page, from_page):
         input(messages[1])
 
         # try again
-        return getpage(page, from_page)
+        return getpage(page)
 
 
 def get_info(i, path):
@@ -265,7 +265,7 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
             page_ind = page + "/" + str(from_page)
 
             print("<< pages left:", from_page, ">>")
-        soup = bs(getpage(page_ind, from_page).content, "html.parser")
+        soup = bs(getpage(page_ind).content, "html.parser")
 
         temptext = []
         tempdate = []
@@ -344,7 +344,7 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
         from_page -= 1
         if upd:
             for post_number in range(len(tempkey)):
-                if tempkey[post_number] in update_parsed_array[1][3]:
+                if tempkey[post_number] == update_parsed_array[1][3][0]:
                     print("upd")
                     prep(keys)
 
@@ -563,15 +563,15 @@ def download_images(images, download_path, warn_on=True):
             print("\n<<Download", len(images), "files?>>\n")
             x = input("><Proceed ([y]/n)?><")
             if x.lower() == "y":
-                downloader(images, download_path,warn_on)
+                downloader(images, download_path, warn_on)
             elif x.lower() == "n":
                 print("<<exiting>>")
             else:
                 print("><!Input value is incorrect, try again.!><\n[y - Yes]\n[n - No]")
-                download_images(images, download_path,warn_on)
+                download_images(images, download_path, warn_on)
 
     else:
-        downloader(images, download_path,warn_on)
+        downloader(images, download_path, warn_on)
 
 
 def save_var_ovr(var, name="new_pkl_file"):
@@ -656,6 +656,60 @@ def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
 
 def parse_user_comments(userpage):
     pass
+
+
+def get_tags(t="s", till=101):
+    """
+    получить список самых популярных тегов
+
+
+    :param t: s = от количества подписок на тег, r - от рейтинка (низходящий)
+    :param till: до какой страницы сканировать (максимум 101)
+    :return: [имена, количество постов в теге, количество подписок, рейтинг тега, ссылка на иконку тега] narray object
+    """
+
+    if t[0] == "s":
+        tmptype = "subscribers/"
+    elif t[0] == "r":
+        tmptype = ""
+    else:
+        raise TypeError
+
+    tmpicon = []
+    tmpname = []
+    tmptagrate = []
+    tmpsub = []
+    tmp_p_count = []
+
+    for i in range(2, till):  # 101
+        soup = bs(getpage("http://joyreactor.cc/tags/" + tmptype + str(i)).content, "html.parser")
+        for itag in soup.findAll("div", {"class": "blog_list_item"}):
+
+            for ii in itag.select(".blog_list_avatar > a > img"):
+                tmpicon.append(ii["src"])
+
+            rc = itag.select(".blog_list_name > small")
+            tmpsub.extend(re.findall(r'\d+', rc[1].text))
+
+            tmp = re.findall(r'\d+', rc[0].text)
+            tmp.insert(-1, ".")
+            tmptagrate.append("".join(tmp))
+
+            ap = itag.select(".blog_list_name > strong > a")
+            for iiii in ap:
+                tmpname.append(iiii["title"])
+
+            posts_c = str(ap[0])
+            x = len(posts_c)
+            for count in range(x - 5, 0, -1):
+                if posts_c[count] == "(":
+                    tmp_p_count.append(posts_c[count + 1:-5])
+                    break
+    return np.array([tmpname,
+                     np.array(tmp_p_count, dtype=np.int),
+                     np.array(tmpsub, dtype=np.int),
+                     np.array(tmptagrate, dtype=np.float),
+                     tmpicon], dtype=object)
 
 
 __author__ = "ExE"
