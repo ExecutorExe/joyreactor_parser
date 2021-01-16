@@ -713,7 +713,7 @@ def get_tags(t="s", till=101):
 
 
 __author__ = "ExE"
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 # Я реакторе - FEAR2k
 
 
