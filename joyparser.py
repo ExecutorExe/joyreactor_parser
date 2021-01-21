@@ -7,6 +7,7 @@ import requests as rq  # '2.24.0'
 from bs4 import BeautifulSoup as bs  # version '4.9.1'
 from requests.exceptions import ConnectionError
 import numpy as np  # 1.19.1
+from numba import njit  # 0.51.2
 from numpy import array as araara  # :D
 import re
 import logging
@@ -27,6 +28,30 @@ messages = np.array(["<<!alert, connection error!>>",
 
 
 # DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
+
+@njit
+def uni(array, leng, empty_array):
+    """
+    unique
+    empty_array[:count]
+    :param array:
+    :param leng:
+    :param empty_array:
+    :return:
+    """
+    count = 1
+    empty_array[0] = 0
+    for i in range(1, leng):
+        state = True
+        for j in range(count):
+            if array[i] == array[empty_array[j]]:
+                state = False
+                break
+        if state:
+            empty_array[count] = i
+            count = count + 1
+    return count
+
 
 def downloader(links, d_path, warn_on):
     # это данные которые передаются при запросе к link
@@ -178,7 +203,7 @@ def search(base="joyreactor", search=[], tags=[], user=[]):
            "&user={}".format("%2C+".join(user)) + "&tags=" + "{}".format("%2C+".join(tags)) + "&"
 
 
-def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_array=None):
+def parser(page, from_page=int, until_page=0, update_parsed_array=None):
     """
     парсер может сканировать теги or основные страницы по типу best or юзеров одиночные посты or поисковые запросы
 
@@ -214,6 +239,7 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
     if update_parsed_array is None:
         upd = False
     else:
+
         upd = True
 
     if from_page == int:  # default setting if no custom numbers
@@ -240,23 +266,7 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
     images = []
     tags = []
 
-    def prep(keys):
-        lenpost = len(keys)
-
-        keys, indices = np.unique(keys, return_index=True)
-        for i in range(lenpost - 1, -1, -1):
-
-            if i not in indices:
-
-                del images[i]
-                del tags[i]
-                del rating[i]
-                del date[i]
-                del lencomments[i]
-                if posttext:
-                    del bestcomments[i]
-                    del txt[i]
-        # print(len(images),len(tags), len(rating),len(date),len(lencomments))
+    # print(len(images),len(tags), len(rating),len(date),len(lencomments))
 
     while not from_page == until_page:
         if search:
@@ -279,14 +289,13 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
         for i in soup.select(".article.post-normal"):
 
             datatext = []
-            if posttext:
-                # парс текста в посте если он имеется
-                for io in i.select(".post_content > div"):
-                    if io.text:
-                        datatext.append(io.text)
+            # парс текста в посте если он имеется
+            for io in i.select(".post_content > div"):
+                if io.text:
+                    datatext.append(io.text)
 
-                        # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
-                    tempbestcom.append(get_info(i, '.post_comment_list > div > div'))
+                    # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
+                tempbestcom.append(get_info(i, '.post_comment_list > div > div'))
 
             temptags.append(get_info(i, ".post_top > .taglist > b > a"))
             # рейтинг поста
@@ -302,7 +311,7 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
                     input("><to reconnect type anything><")
 
                     # try again
-                    return parser(page, from_page, until_page, posttext)
+                    return parser(page, from_page, until_page, update_parsed_array)
                     # exit()
 
             # дата  день год месяц точное время
@@ -320,7 +329,6 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
             dataimage = []
             for i0 in i.select(".post_content"):
                 for i1 in i0.select(".image"):
-                    # print(i3)
                     # "a" - большие изображения которые надо разворачивать + гифки
                     # "img" - мелкие изображения которые слишком малы что бы разворачивать
                     for i2 in i1.findAll(["a", "img"][:]):
@@ -340,23 +348,34 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
                             break
             images.append(dataimage)
             temptext.append(datatext)
-
         from_page -= 1
         if upd:
             for post_number in range(len(tempkey)):
-                if tempkey[post_number] == update_parsed_array[1][3][0]:
-                    print("upd")
-                    prep(keys)
+                if np.uint32(tempkey[post_number]) == update_parsed_array[1][3][0]:
+                    print("<< Found update at ", tempkey[post_number], " >>")
 
-                    return np.append(images, update_parsed_array[0]), \
-                           np.array([np.append(tags, update_parsed_array[1][0]),
-                                     np.append(rating, update_parsed_array[1][1]),
-                                     np.append(date, update_parsed_array[1][2]),
-                                     np.append(keys, update_parsed_array[1][3]),
-                                     np.append(np.array(lencomments).astype(dtype=int), update_parsed_array[1][4])],
-                                    dtype=object), \
-                           np.array([np.append(txt, update_parsed_array[2][0]),
-                                     np.append(bestcomments, update_parsed_array[2][1])], dtype=object)
+                    len_arr = len(keys)
+                    keys = np.array(keys, dtype=np.uint32)
+                    indices = np.empty(len_arr, dtype=np.uint32)
+                    end_index = uni(keys, len_arr, indices)
+                    indices = indices[:end_index]
+
+                    if len(keys) == 0:
+                        print("<< No updates found >>")
+                        return update_parsed_array
+                    else:
+                        return np.append(np.array(images, dtype=object)[indices], update_parsed_array[0]), \
+                               np.array([np.append(np.array(tags, dtype=object)[indices], update_parsed_array[1][0]),
+                                         np.append(np.array(rating, dtype=np.float32)[indices],
+                                                   update_parsed_array[1][1]),
+                                         np.append(np.array(date, dtype=object)[indices], update_parsed_array[1][2]),
+                                         np.append(keys[indices], update_parsed_array[1][3]),
+                                         np.append(np.array(lencomments, dtype=np.uint32)[indices],
+                                                   update_parsed_array[1][4])],
+                                        dtype=object), \
+                               np.array([np.append(np.array(txt, dtype=object)[indices], update_parsed_array[2][0]),
+                                         np.append(np.array(bestcomments, dtype=object)[indices],
+                                                   update_parsed_array[2][1])], dtype=object)
 
                 else:
                     rating.append(temprating[post_number])
@@ -378,13 +397,22 @@ def parser(page, from_page=int, until_page=0, posttext=False, update_parsed_arra
             date.extend(tempdate)
             time.sleep(timeout)
 
+    keys = np.array(keys, dtype=np.uint32)
     # избавляемся от дубликатов если они есть
     # нет не мог использовать словари, патаму шо медленные и numpy one love
-    prep(keys)
+    len_arr = len(keys)
+    indices = np.empty(len_arr, dtype=np.uint32)
+    end_index = uni(keys, len_arr, indices)
+    indices = indices[:end_index]
+
     return \
-        np.array(images, dtype=object), \
-        np.array([tags, rating, date, keys, np.array(lencomments).astype(dtype=int)], dtype=object), \
-        np.array([txt, bestcomments], dtype=object)
+        np.array(images, dtype=object)[indices], \
+        [np.array(tags, dtype=object)[indices],
+         np.array(rating, dtype=np.float32)[indices],
+         np.array(date, dtype=object)[indices],
+         keys[indices],
+         np.array(lencomments, dtype=np.uint32)[indices]], \
+        [np.array(txt, dtype=object)[indices], np.array(bestcomments, dtype=object)[indices]]
 
 
 def get_val_by_index(value, index):
@@ -718,7 +746,7 @@ def get_tags(t="s", till=101):
 
 
 __author__ = "ExE"
-__version__ = "1.0.6"
+__version__ = "0.1.7"
 # Я реакторе - FEAR2k
 
 
