@@ -686,7 +686,7 @@ def parse_user_comments(userpage):
     pass
 
 
-def get_tags(t="s", till=101):
+def get_popular_tags(t="s", till=101):
     """
     получить список самых популярных тегов
 
