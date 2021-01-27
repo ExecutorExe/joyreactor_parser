@@ -365,17 +365,13 @@ def parser(page, from_page=int, until_page=0, update_parsed_array=None):
                         return update_parsed_array
                     else:
                         return np.append(np.array(images, dtype=object)[indices], update_parsed_array[0]), \
-                               np.array([np.append(np.array(tags, dtype=object)[indices], update_parsed_array[1][0]),
-                                         np.append(np.array(rating, dtype=np.float32)[indices],
-                                                   update_parsed_array[1][1]),
-                                         np.append(np.array(date, dtype=object)[indices], update_parsed_array[1][2]),
-                                         np.append(keys[indices], update_parsed_array[1][3]),
-                                         np.append(np.array(lencomments, dtype=np.uint32)[indices],
-                                                   update_parsed_array[1][4])],
-                                        dtype=object), \
-                               np.array([np.append(np.array(txt, dtype=object)[indices], update_parsed_array[2][0]),
-                                         np.append(np.array(bestcomments, dtype=object)[indices],
-                                                   update_parsed_array[2][1])], dtype=object)
+                               [np.append(np.array(tags, dtype=object)[indices], update_parsed_array[1][0]),
+                                np.append(np.array(rating, dtype=np.float32)[indices], update_parsed_array[1][1]),
+                                np.append(np.array(date, dtype=object)[indices], update_parsed_array[1][2]),
+                                np.append(keys[indices], update_parsed_array[1][3]),
+                                np.append(np.array(lencomments, dtype=np.uint32)[indices], update_parsed_array[1][4])], \
+                               [np.append(np.array(txt, dtype=object)[indices], update_parsed_array[2][0]),
+                                np.append(np.array(bestcomments, dtype=object)[indices], update_parsed_array[2][1])]
 
                 else:
                     rating.append(temprating[post_number])
@@ -426,76 +422,64 @@ def get_val_by_index(value, index):
     return np.array(value, dtype=object)[index]
 
 
+@njit
 def sort_by_rate_comments(val, rating=0):
     """
     Рейтинг = imfo[1] | Комменты - imfo[4]
 
 
-
     :param info: 1 аргумент переменная с информацией
     :param rating: 2 аргумент - цифра, ниже этого значения посты не пройдут
     :return: отсортированные индексы
     """
-    ind = None
-    idexes = np.argsort(val)[::-1]
-    for i, v in enumerate(araara(val)[idexes]):
+    ln = len(val)
+    init_ind = np.empty(ln, dtype=np.uint)
+    counter = 0
+    for i in range(ln):
+        if val[i] >= rating:
+            init_ind[counter] = i
+            counter += 1
 
-        if v < rating:
-            ind = i
-            break
-
-    if ind is None:
-        return idexes
-    else:
-        return idexes[:ind]
+    return init_ind[:counter]
 
 
-def n_sort_by_rate_comments(val, rating=0):
-    """
-    Рейтинг = imfo[1] | Комменты - imfo[4]
-
-
-    :param info: 1 аргумент переменная с информацией
-    :param rating: 2 аргумент - цифра, ниже этого значения посты не пройдут
-    :return: отсортированные индексы
-    """
-    return val[np.where(val >= rating)]
-
-
-def except_tag(info=list, tagexceptions=list, spike=None):
+def except_tag(info: list, tagexceptions: list, spike=None):
     """
     индекс тегов - info[0]
 
     :param info: принемает масив с информацией
     :param tagexceptions: список с исключениями которые вы выбераете например [фурри, furry]
-    :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
+    :param spike: по умолчанию если все теги присудствуют то пост будет считаться
     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
     :return: возвращает индексы
     """
     if spike is None:
         spike = len(tagexceptions)
+    ln = len(info)
 
-    sortedlist = []
+    counter = 0
+    ind = np.empty(ln, dtype=np.uint)
 
     for i, v in enumerate(info):
-        counter = 0
+        excepet_counter = 0
         for i0 in tagexceptions:
             if i0 in v:
-                counter = counter + 1
+                excepet_counter += 1
 
-        if not counter >= spike:
-            sortedlist.append(i)
+        if not excepet_counter >= spike:
+            ind[counter] = i
+            counter += 1
 
-    return araara(sortedlist)
+    return ind[:counter]
 
 
-def sort_by_tag(info=list, tagexceptions=list, spike=None):
+def sort_by_tag(info: list, tagexceptions: list, spike=None):
     """
     индекс тегов - info[0]
 
     :param info: принемает масив с информацией
     :param tagexceptions: список с исключениями которые вы выбераете например [хоба!, anime]
-    :param spike: по умолчанию если все теш=ги присудствуют то пост будет считаться
+    :param spike: по умолчанию если все теги присудствуют то пост будет считаться
     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
     :return: возвращает новый отсортированный список
 
