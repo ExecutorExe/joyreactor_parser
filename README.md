@@ -222,7 +222,7 @@ parse_user_tag_list(user_page, fullname=False)
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
 
-get_tags(t="s", till=101)
+get_popular_tags(t="s", till=101)
 
   Получить список самых популярных тегов
 
