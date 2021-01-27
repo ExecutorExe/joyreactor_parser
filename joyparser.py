@@ -730,7 +730,7 @@ def get_popular_tags(t="s", till=101):
 
 
 __author__ = "ExE"
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 # Я реакторе - FEAR2k
 
 
