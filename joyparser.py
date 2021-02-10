@@ -135,7 +135,7 @@ def getimage(Im_link, request, path_FileBaseName, warn_on):
 
 # END_DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
 
-def page_max(page):
+def page_max(page:str):
     """
 
     :param page: принимает ссылку и проверяет сколько страниц
@@ -203,7 +203,7 @@ def search(base="joyreactor", search=[], tags=[], user=[]):
            "&user={}".format("%2C+".join(user)) + "&tags=" + "{}".format("%2C+".join(tags)) + "&"
 
 
-def parser(page, from_page=int, until_page=0, update_parsed_array=None):
+def parser(page:str, from_page: int, until_page=0, update_parsed_array=None):
     """
     парсер может сканировать теги or основные страницы по типу best or юзеров одиночные посты or поисковые запросы
 
@@ -404,9 +404,11 @@ def parser(page, from_page=int, until_page=0, update_parsed_array=None):
     return \
         np.array(images, dtype=object)[indices], \
         [np.array(tags, dtype=object)[indices],
+
          np.array(rating, dtype=np.float32)[indices],
          np.array(date, dtype=object)[indices],
          keys[indices],
+
          np.array(lencomments, dtype=np.uint32)[indices]], \
         [np.array(txt, dtype=object)[indices], np.array(bestcomments, dtype=object)[indices]]
 
@@ -443,7 +445,7 @@ def sort_by_rate_comments(val, rating=0):
     return init_ind[:counter]
 
 
-def except_tag(info: list, tagexceptions: list, spike=None):
+def except_tag(info, tagexceptions: list, spike=None):
     """
     индекс тегов - info[0]
 
@@ -473,7 +475,7 @@ def except_tag(info: list, tagexceptions: list, spike=None):
     return ind[:counter]
 
 
-def sort_by_tag(info: list, tagexceptions: list, spike=None):
+def sort_by_tag(info, tagexceptions: list, spike=None):
     """
     индекс тегов - info[0]
 
@@ -517,7 +519,7 @@ def get_rdy(images):
         return []
 
 
-def parse_user_tag_list(page, fullname=False):
+def parse_user_tag_list(page:str, fullname=False):
     """
     парсит подписки (теги) юзера
 
@@ -628,7 +630,7 @@ def load_var(file):
     return var
 
 
-def votegun(posts_array, cookie, token, vote=True, __abyss="0"):
+def votegun(posts_array, cookie: str, token, vote=True, __abyss="0"):
     """
     плюсо/минусо-мет
     (просьба не злоупотреблять этой функцией)
