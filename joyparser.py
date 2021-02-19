@@ -352,7 +352,7 @@ def parser(page:str, from_page: int, until_page=0, update_parsed_array=None):
         if upd:
             for post_number in range(len(tempkey)):
                 if np.uint32(tempkey[post_number]) == update_parsed_array[1][3][0]:
-                    print("<< Found update at ", tempkey[post_number], " >>")
+                    print("<< Found element[0] at ", tempkey[post_number], " >>")
 
                     len_arr = len(keys)
                     keys = np.array(keys, dtype=np.uint32)
