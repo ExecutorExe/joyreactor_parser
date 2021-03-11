@@ -12,7 +12,6 @@ from numpy import array as araara  # :D
 import re
 import logging
 import pickle
-import os.path
 
 # внимание, скорость монижена для того что бы не перегружать сервера сайта
 timeout = 1
