@@ -2,7 +2,7 @@ v0.1.8
 
 # Требования
 
-- python 3.7
+- python>=3.7
 
 - [requirements.txt](https://github.com/ExecutorExe/joyparser/blob/master/requirements.txt)
 
