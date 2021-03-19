@@ -42,16 +42,21 @@ return images, info, txt
 Пример:
 ```python
 import joyparser as jp
-
+import sys
+import os
 till_page = 0  # до какой | http://joyreactor.cc/user/котэ/1
 #
 page = "http://joyreactor.cc/tag/котэ"
 # какая пейджа  пример http://joyreactor.cc/котэ (без оканчания на "/")
-
-d_path = r"D:\parser_data"
-
-from_page = 1
-# от какой страницы | например http://joyreactor.cc/user/котэ/35 
+if sys.platform == "win32":
+    d_path = os.path.expanduser("~")+r"\Downloads"
+elif sys.platform == "linux":
+    d_path = os.path.expanduser("~")+"/Downloads"
+else:
+    print("don't know the os\n")
+    exit()
+from_page = 2
+# от какой страницы | например http://joyreactor.cc/user/котэ/2 
 # или воспользуйтесь jp.page_max(page) эта функция вернет максимальное количество страниц
 
 img, info, txt = jp.parser(page, from_page, till_page)
