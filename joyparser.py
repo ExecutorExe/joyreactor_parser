@@ -57,16 +57,14 @@ def downloader(links, d_path, warn_on):
     # таким образом я избавляюсь от ватермарки сайта
 
     request = ({
-        'Host': 'img10.reactor.cc',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0',
-        'Accept': 'image/webp,*/*',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'Referer': 'http://joyreactor.cc/',
-        'Connection': 'keep-alive',
-
-        'Cache-Control': 'max-age=0',
-        'Pragma': 'no-cache'
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+'Accept-Encoding': 'gzip, deflate',
+'Accept-Language': 'en-GB,en;q=0.9',
+'Connection': 'keep-alive',
+'DNT': '1',
+'Host': 'img1.joyreactor.cc',
+'Referer': 'http://joyreactor.cc/',
+'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
     })
 
     counter = int(len(links))
