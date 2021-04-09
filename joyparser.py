@@ -222,15 +222,9 @@ def parser(page:str, from_page: int, until_page=0, update_parsed_array=None):
 
     Output:
     -------
-    return images,info, txt
-
-    0 - многомерный список с картинками поста
-
-    1 - многомерный список с многомерными списками с информацией [tags,rating, date, keys, lencomments,bestcomments]
-
-    2 - многомерный список с текстом, многомерный список с лучшими комментами [text, bestcomments]
-
-
+    [images,
+    [tags,rating,date,keys],
+    [len_comments,text,bestcomments]]
     """
 
     if update_parsed_array is None:
@@ -409,7 +403,85 @@ def parser(page:str, from_page: int, until_page=0, update_parsed_array=None):
          np.array(lencomments, dtype=np.uint32)[indices]], \
         [np.array(txt, dtype=object)[indices], np.array(bestcomments, dtype=object)[indices]]
 
+def parse_page(page:str):
+    """
+    Parse single page
+    :param page: pagename example: http://joyreactor.cc
+    :return:
+    [images,
+    [tags,rating,date,keys],
+    [len_comments,text,bestcomments]]
+    """
+    soup = bs(getpage(page).content, "html.parser")
+    images = []
+    temptext = []
+    tempdate = []
+    temprating = []
+    tempkey = []
+    temptags = []
+    templencom = []
+    tempbestcom = []
+    # block selection
+    for i in soup.select(".article.post-normal"):
 
+        datatext = []
+        # парс текста в посте если он имеется
+        for io in i.select(".post_content > div"):
+            if io.text:
+                datatext.append(io.text)
+
+                # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
+            tempbestcom.append(get_info(i, '.post_comment_list > div > div'))
+
+        temptags.append(get_info(i, ".post_top > .taglist > b > a"))
+        # рейтинг поста
+        # temprating.append(info(i, ))
+        # temp = []
+        for ay in i.select(".ufoot > div > .post_rating > span"):
+            # creating dict with tags
+            try:
+                temprating.append(float(ay.text))
+            except ValueError as e:
+                logging.error("<<!>>connect to VPN<<!>>")
+                raise e
+
+
+        # дата  день год месяц точное время
+        tempdate.append(get_info(i, ".ufoot > div > .date > span > span"))
+
+        # ссылка на пост
+        for ay in i.select(".ufoot > div > .link_wr > a"):
+            tempkey.append(os.path.basename(ay["href"]))
+
+        for ay in i.select('.commentnum.toggleComments'):
+            # creating dict with tags
+
+            templencom.extend((re.findall(r'\d+', ay.text)))
+
+        dataimage = []
+        for i0 in i.select(".post_content"):
+            for i1 in i0.select(".image"):
+                # "a" - большие изображения которые надо разворачивать + гифки
+                # "img" - мелкие изображения которые слишком малы что бы разворачивать
+                for i2 in i1.findAll(["a", "img"][:]):
+                    # парс исзображения
+                    if i2.has_attr("href"):
+                        # decode urlencoded and add to list
+                        dataimage.append(urllib.parse.unquote(i2["href"]))
+                        break
+
+                    else:
+                        # если нет достаточно крупного изображения
+                        if i2.has_attr("src"):
+                            # decode urlencoded and add to list
+                            dataimage.append(urllib.parse.unquote(i2["src"]))
+                        break
+        images.append(dataimage)
+        temptext.append(datatext)
+    return [images,
+            [temptags,temprating,tempdate,tempkey],
+            [templencom,temptext,tempbestcom]]
+    
 def get_val_by_index(value, index):
     """
     возвращает элементы по индексу

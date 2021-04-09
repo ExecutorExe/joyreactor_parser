@@ -9,4 +9,5 @@ from .joyparser import \
     save_var_ovr, search, \
     sort_by_rate_comments, \
     get_popular_tags,\
+    parse_page,\
     __author__
