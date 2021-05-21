@@ -1,13 +1,27 @@
-v0.1.8 
-
-anaconda3 
+v0.1.9 ; anaconda3 
 
 # Требования
 
 - python>=3.7
 
 - [requirements.txt](https://github.com/ExecutorExe/joyparser/blob/master/requirements.txt)
+# Установка
 
+После активации нужной среды выполните команды
+```bash
+# get site-packages dir
+tmp=$(python3 -c 'import site; print(site.getsitepackages()[0])')/joyparser
+# clone package to env package-dir
+git clone https://github.com/ExecutorExe/joyparser ${tmp}
+```
+Если Anaconda
+```bash
+conda install --file ${tmp}/requirements.txt
+```
+Если Python
+```bash
+pip install -r ${tmp}/requirements.txt
+```
 
 # Документация
 page_max (page): - Определяет максимальное количество страниц
@@ -50,20 +64,15 @@ till_page = 0  # до какой | http://joyreactor.cc/user/котэ/1
 #
 page = "http://joyreactor.cc/tag/котэ"
 # какая пейджа  пример http://joyreactor.cc/котэ (без оканчания на "/")
-if sys.platform == "win32":
-    d_path = os.path.expanduser("~")+r"\Downloads"
-elif sys.platform == "linux":
-    d_path = os.path.expanduser("~")+"/Downloads"
-else:
-    print("don't know the os\n")
-    exit()
+if sys.platform == "linux" or sys.platform == "win32":
+    info_struct.d_path = os.path.join(os.path.expanduser("~"),"Downloads")
+
 from_page = 2
 # от какой страницы | например http://joyreactor.cc/user/котэ/2 
 # или воспользуйтесь jp.page_max(page) эта функция вернет максимальное количество страниц
 
 img, info, txt = jp.parser(page, from_page, till_page)
-
-jp.download_images(jp.get_rdy(img[jp.sort_by_rate_comments(info[1],10)]),download_path=d_path)
+jp.download_images(jp.get_rdy(img[jp.sort_by_rate_comments(info[1],10)]))
 
 ```
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -179,11 +188,11 @@ get_rdy(images)
 
 
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-download_images(images, download_path, warn_on=True)
+download_images(images, multprocess_d = False, warn_on=True)
 
-- 1 Аргумент принимает одномерный массив/список изображений
+- 1 аргумент принимает одномерный массив/список изображений
 
-- 2 Аргумент в какую дирректорию надо скачивать
+- 2 аргумент включает multiprocess download (выключено по умолчанию)
 
 - 3 аргумент отключения предупреждений по уполчанию влючено True/False
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -237,3 +246,13 @@ get_popular_tags(t="s", till=101)
 - до какой страницы сканировать (максимум 101)
     
 -- возвращает [имена, количество постов в теге, количество подписок, рейтинг тега, ссылка на иконку тега] narray object
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+info_struct 
+
+Глобальная структура хранящая переменные:
+
+thread_num  - создает N количество потоков(субпроцессов) по дефолту эквивалентно количеству (физических ядер * логических ядер)
+
+timeout = 1 - таймаут функции jp.parser 
+
+d_path = os.path.join(os.path.expanduser("~"), "Downloads") - путь для скачивания по дефолту (${HOME}/Downloads)
