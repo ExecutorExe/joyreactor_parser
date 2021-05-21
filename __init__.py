@@ -10,6 +10,4 @@ from .joyparser import \
     sort_by_rate_comments, \
     get_popular_tags,\
     parse_page,\
-    info_struct,\
     __author__
-__version__ = "0.1.9"
