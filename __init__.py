@@ -1,5 +1,5 @@
 from .joyparser import \
-    page_max, parser, \
+    getimage, page_max, parser, \
     get_rdy, get_val_by_index, \
     except_tag, download_images, \
     votegun, sort_by_tag, \
@@ -10,4 +10,7 @@ from .joyparser import \
     sort_by_rate_comments, \
     get_popular_tags,\
     parse_page,\
-    __author__
+    getimage,\
+    info_struct,\
+    __author__,__version__
+
