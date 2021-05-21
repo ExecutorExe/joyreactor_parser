@@ -638,10 +638,10 @@ def download_images(images, warn_on=True):
                 print("<<exiting>>")
             else:
                 print("><!Input value is incorrect, try again.!><\n[y - Yes]\n[n - No]")
-                download_images(images, warn_on)
+                download_images(images)
 
     else:
-        mpdownloader(images, download_path, warn_on)
+        mpdownloader(images)
 
 
 def save_var_ovr(var, name="new_pkl_file"):
