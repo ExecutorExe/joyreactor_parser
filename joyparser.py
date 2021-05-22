@@ -622,11 +622,11 @@ def parse_user_tag_list(page: str, fullname=False):
 def download_images(images,multprocess_d = False, warn_on=True):
     """
 
-    :param images: 1 аргумент принемает подготовленный список изображений (get_rdy(images) просто вставьте это)
+    :param images: 1 аргумент принимает подготовленный список изображений get_rdy(images)
 
-    :param download_path: 2 аргумент в какую дирректорию надо скачивать
+    :param multprocess_d: 2 аргумент включает multiprocess download (выключено по умолчанию)
 
-    :param warn_on: 3 аргумент отключения предупреждений по уполчанию влючено
+    :param warn_on: 3 аргумент отключения предупреждений по умолчанию влючено
 
     """
     foopoiner = mtdownloader
@@ -639,7 +639,7 @@ def download_images(images,multprocess_d = False, warn_on=True):
             print(messages[3])
         else:
             print("\n<<Download", len(images), "files?>>\n")
-            x = input("><Proceed ([y]/n)?><")
+            x = input("><Proceed (y/n)?><")
             if x.lower() == "y":
                 
                 foopoiner(images)
