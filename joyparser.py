@@ -103,7 +103,8 @@ def getimage(Im_link):
         'Host': 'img1.joyreactor.cc',
         'Referer': 'http://joyreactor.cc/',
     })
-    request["Host"] = Im_link[7:12] + ".joyreactor.cc"
+    request["Host"] = Im_link[7:Im_link.index('.',7)] + ".joyreactor.cc"
+    #print(request["Host"],Im_link)
     path_FileBaseName = info_struct.d_path + os.sep + os.path.basename(Im_link)
     # проверяем существует ли файл в диооектории
     if not os.path.exists(path_FileBaseName):
