@@ -27,17 +27,46 @@ class info_struct:
     thread_num = cpu_count()
     timeout = 1
     d_path = os.path.join(os.path.expanduser("~"), "Downloads")
+
+
 # DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
 
-@njit
+@njit  # jit compiler
 def uni(array, leng, empty_array):
     """
-    unique
+    unique with order
     empty_array[:count]
-    :param array:
-    :param leng:
-    :param empty_array:
-    :return:
+    :param array: array to unique
+    :param leng: len
+    :param empty_array: np.empty(len(arr),dtype=np.uint)
+    :return: size_t
+    Я хоть и не частро использую goto в C, но в этом коде она бы зашла на много лучше
+    Пример:
+    //Но читабельность отвратительна
+    size_t uni(int* restrict arr,size_t* restrict arr_i, size_t* restrict size){
+        size_t i = 0;
+        size_t ii;
+        size_t count = 0;
+        goto A;
+        A:
+            ii = 0;
+            if (*size > i)
+                goto B;
+
+            return count;
+        B:
+            
+            if (ii < count){
+                if(arr[i] == arr[arr_i[ii++]]){
+                    i++;
+                    goto A;
+                }
+                goto B;
+            }
+            
+            arr_i[count++] = i++;
+            goto A;
+}
     """
     count = 1
     empty_array[0] = 0
@@ -52,25 +81,23 @@ def uni(array, leng, empty_array):
             count = count + 1
     return count
 
+
 def mtdownloader(links):
     """
     single (master) thread donwnloader
     """
-    # why i can't just 
-    # #pragma omp parallel for
-    # in python 
     for i in links:
         getimage(i)
+
 
 def mpdownloader(links):
     """
     create N workers(processes) for function 
     # why i can't just 
-    # #pragma omp parallel for
+    # #pragma omp parallel for shared(links) schedule(dynamic)
     # in python """
     with ThreadPoolExecutor(max_workers=info_struct.thread_num) as p:
-        p.map(getimage,links)
-
+        p.map(getimage, links)
 
 
 def getpage(page):
@@ -103,8 +130,8 @@ def getimage(Im_link):
         'Host': 'img1.joyreactor.cc',
         'Referer': 'http://joyreactor.cc/',
     })
-    request["Host"] = Im_link[7:Im_link.index('.',7)] + ".joyreactor.cc"
-    #print(request["Host"],Im_link)
+    request["Host"] = Im_link[7:Im_link.index('.', 7)] + ".joyreactor.cc"
+    # print(request["Host"],Im_link)
     path_FileBaseName = info_struct.d_path + os.sep + os.path.basename(Im_link)
     # проверяем существует ли файл в диооектории
     if not os.path.exists(path_FileBaseName):
@@ -140,13 +167,6 @@ def page_max(page: str):
                 temp.extend(map(int, i1(text=True)))
 
         return max(temp)
-    except ConnectionError:
-        print(messages[0])
-        # sleep for a bit in case that helps
-        # try again
-        time.sleep(2)
-        print(messages[2])
-        return page_max(page)
     except ValueError as e:
         if "/post/" in page or "/tag/" in page or "/user/" in page or "/search/" in page:
             return 1
@@ -620,7 +640,7 @@ def parse_user_tag_list(page: str, fullname=False):
             return parse_user_tag_list(page, fullname)
 
 
-def download_images(images,multprocess_d = False, warn_on=True):
+def download_images(images, multprocess_d=False, warn_on=True):
     """
 
     :param images: 1 аргумент принимает подготовленный список изображений get_rdy(images)
@@ -633,7 +653,7 @@ def download_images(images,multprocess_d = False, warn_on=True):
     foopoiner = mtdownloader
     if multprocess_d:
         foopoiner = mpdownloader
-    
+
     # эта функция интуитивно понятна
     if warn_on:
         if len(images) == 0:
@@ -642,7 +662,7 @@ def download_images(images,multprocess_d = False, warn_on=True):
             print("\n<<Download", len(images), "files?>>\n")
             x = input("><Proceed (y/n)?><")
             if x.lower() == "y":
-                
+
                 foopoiner(images)
             elif x.lower() == "n":
                 print("<<exiting>>")
