@@ -1,4 +1,4 @@
-v0.1.9 ; anaconda3 
+v0.2.0 ; anaconda3 
 
 # Требования
 
@@ -56,27 +56,47 @@ return images, info, txt
 -- 2 - многомерный список с текстом и лучшими комментами
 
 Пример:
+
 ```python
-import joyparser as jp
+from joyparser import jp
 import sys
 import os
+
 till_page = 0  # до какой | http://joyreactor.cc/user/котэ/1
 #
 page = "http://joyreactor.cc/tag/котэ"
 # какая пейджа  пример http://joyreactor.cc/котэ (без оканчания на "/")
 if sys.platform == "linux" or sys.platform == "win32":
-    info_struct.d_path = os.path.join(os.path.expanduser("~"),"Downloads")
+    info_struct.d_path = os.path.join(os.path.expanduser("~"), "Downloads")
 
 from_page = 2
 # от какой страницы | например http://joyreactor.cc/user/котэ/2 
 # или воспользуйтесь jp.page_max(page) эта функция вернет максимальное количество страниц
 
 img, info, txt = jp.parser(page, from_page, till_page)
-jp.download_images(jp.get_rdy(img[jp.sort_by_rate_comments(info[1],10)]))
+jp.download_images(jp.get_rdy(img[jp.sort_by_rate_comments(info[1], 10)]))
 
 ```
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-sort_by_tag(info=list, tagexceptions=list, spike=None)
+def parse_page(link: str,base:dict,upd=False)
+Похоже на parser но сканирует одну страницу и изменяем входной аргумент base (dict)
+Каждый ключ словаря == номер поста каждый елемент содержит си подобную структуру
+
+self.images = images
+
+self.text = text
+
+self.tags = tags
+
+self.rating = rating
+
+self.datetime = datetime
+
+self.comments_len = comments_len
+
+upd=True прервет саканирование если найдет любое совпадение
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
+filter_by_tag(info=list, tagexceptions=list, spike=None)
      индекс тегов - info[0]
 
 
@@ -88,22 +108,23 @@ sort_by_tag(info=list, tagexceptions=list, spike=None)
     засчитаным, если же вы поставите 1 то достаточно будет одного тега для того что бы пост прошел
     
    -- возвращает новый отсортированный список индексов
-```python
-import numpy as np 
-import joyparser as jp
 
-value = np.array([[1,2,3,4],
-                  [11,22,33,44],
-                  [111,222,333,444]])
-indexes = np.array([10,5,7])
-print(value[jp.sort_by_tag(value,[1,2])])
-#output [[1 2 3 4]]
-print(value[jp.sort_by_tag(value,[1,2,44])])
-#IndexError: arrays used as indices must be of integer (or boolean) type
+```python
+import numpy as np
+from joyparser import jp
+
+value = np.array([[1, 2, 3, 4],
+                  [11, 22, 33, 44],
+                  [111, 222, 333, 444]])
+indexes = np.array([10, 5, 7])
+print(value[jp.filter_by_tag(value, [1, 2])])
+# output [[1 2 3 4]]
+print(value[jp.filter_by_tag(value, [1, 2, 44])])
+# IndexError: arrays used as indices must be of integer (or boolean) type
 # потому что нет результатов от все трех запрашиваемых значений
-print(value[jp.sort_by_tag(value,[1,2,44],spike=1)])
-#output
-#[[ 1  2  3  4]
+print(value[jp.filter_by_tag(value, [1, 2, 44], spike=1)])
+# output
+# [[ 1  2  3  4]
 # [11 22 33 44]]
 ```
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -122,7 +143,7 @@ except_tag(info=list, tagexceptions=list, spike=None)
  
  Все тоже самое что и sort_by_tag просто исключения тегов
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
-sort_by_rate_comments(info_index, rating=0)
+filer_by_rate_comments(info_index, rating=0)
     
    Рейтинг = imfo[1] | Комменты - imfo[4]
 
@@ -133,25 +154,26 @@ sort_by_rate_comments(info_index, rating=0)
  -- отсортированные индексы
  
  Пример:
+
  ```python
 import numpy as np
-import joyparser as jp
+from joyparser import jp
 
-value = np.array([[1,2,3,4],
-                  [11,22,33,44],
-                  [111,222,333,444]])
-indexes = np.array([10,5,7])
-print(value[jp.sort_by_rate_comments(indexes,6)])
+value = np.array([[1, 2, 3, 4],
+                  [11, 22, 33, 44],
+                  [111, 222, 333, 444]])
+indexes = np.array([10, 5, 7])
+print(value[jp.filer_by_rate_comments(indexes, 6)])
 
-#output
-#[[  1   2   3   4]
+# output
+# [[  1   2   3   4]
 # [111 222 333 444]]
 # или можно воспользоваться np.where 
 
-print(value[np.where(indexes>=6)])
+print(value[np.where(indexes >= 6)])
 
-#output
-#[[  1   2   3   4]
+# output
+# [[  1   2   3   4]
 # [111 222 333 444]]
 ```
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
@@ -203,11 +225,11 @@ votegun(posts_array, cookie, token, vote=True, __abyss="0")
 
 - posts_array: номера постов(одномерный масив)
   
-- cookie: куки(что бы их узнать зайдите на сайт и нажмите f12 -> network -> проголосуйте за любой пост -> в появившейся загрузке в пункте reqest headers будет ваша куки)
-
 - token: все тоже самое что и с куки, в самом низу должен быть токен
 
 - vote: голосует за или против(True/False)
+
+- cookie (global info_struct): куки(что бы их узнать зайдите на сайт и нажмите f12 -> network -> проголосуйте за любой пост -> в появившейся загрузке в пункте reqest headers будет ваша куки)
 
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 save_var_ovr(var, name="new_pkl_file")
@@ -256,3 +278,5 @@ thread_num  - создает N количество потоков(субпро�
 timeout = 1 - таймаут функции jp.parser 
 
 d_path = os.path.join(os.path.expanduser("~"), "Downloads") - путь для скачивания по дефолту (${HOME}/Downloads)
+
+cookie
