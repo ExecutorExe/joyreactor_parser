@@ -1,6 +1,8 @@
-#Тут находятся более хайлевловые функции
+# Тут находятся более хайлевловые функции
 import re
 import pickle
+import sys
+
 from .jpl import *
 from requests.exceptions import ConnectionError
 
@@ -10,8 +12,9 @@ messages = np.array(["<<!alert, connection error!>>",
                      "<<trying to reconnect>>",
                      "<<files does not found>>"])
 
-
 # DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
+cerrortimeout = 5  # if connection error
+
 
 def uni(array, leng, empty_array):
     """
@@ -76,6 +79,45 @@ def getpage(page):
         return getpage(page)
 
 
+def to_ndarray(base: dict):
+    """
+    convert base to ndarray
+    :param base: dict
+    :return: [
+    images,
+    txt,
+    tags,
+    rating,
+    date,
+    keys,
+    len_comments] dtype = object
+    """
+    images_ = list()
+    tags_ = list()
+    rating_ = list()
+    date = list()
+    lencomments = list()
+    txt = list()
+    keys_ = list()
+    for i in base.keys():
+        images_.append(base[i].images)
+        txt.append(base[i].text)
+        tags_.append(base[i].tags)
+        rating_.append(base[i].rating)
+        date.append(base[i].datetime)
+        lencomments.append(base[i].comments_len)
+        keys_.append(i)
+    return \
+           [np.array(images_, dtype=object),
+                    np.array(txt, dtype=object),
+                    np.array(tags_, dtype=object),
+                    np.array(rating_, dtype=np.float32),
+                    np.array(date, dtype=np.float64),
+                    np.array(keys_).astype(np.uint32),
+                    np.array(lencomments, dtype=np.uint32)]
+                
+
+
 # END_DRY -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#- -#-
 
 
@@ -115,209 +157,54 @@ def search(base="joyreactor", search=[], tags=[], user=[]):
            "&user={}".format("%2C+".join(user)) + "&tags=" + "{}".format("%2C+".join(tags)) + "&"
 
 
-def parser(page: str, from_page: int, until_page=0, update_parsed_array=None):
+def parser2(page: str, from_page : int, until_page=0, upd=None,dct = False,eignore = True):
     """
-    парсер может сканировать теги or основные страницы по типу best or юзеров одиночные посты or поисковые запросы
+    парсер может сканировать теги or основные страницы по типу best or юзеров одиночные посты
 
-    Input:
-    ------
-    -- parser(page, from_page, until_page=0, on_info=False,posttext=False )
+    - upd: dict | update existing data
 
-    -page -- первый аргумент это какая страница дожна быть просканирована|
-    "://" обязателен, на конце не должно быть "/"
-    например http://joyreactor.cc/tag/Sakimichan
-
-    -from_page -- второй аргумент получает цифру от какой страницы сканировать
-
-    -until_page -- третий аргумент получает цифру (по умолчанию 0)
-
-    -posttext -- парсит текст поста и лучших комментов по умолчанию выключен(не обязательный аргумент)
-
-    -update_parsed_array принимает уже отпарсеный список и обновит до первого совпавшего поста(не обязательный аргумент)
-    если обновлений не найдено возвращает None
+    -dct: bool | return dict
 
     Output:
     -------
-    [images,
-    [tags,rating,date,keys],
-    [len_comments,text,bestcomments]]
+    [images,text,tags,rating,date,keys,len_comments] dtype=object
     """
+    m = np.int8(0xFF)
+    if eignore:
+        m = np.int8(0b01111111)
+    if page[-1] == "/":
+        page = page[:-1]
 
-    if update_parsed_array is None:
-        upd = False
-    else:
-
-        upd = True
-
-    if from_page == int:  # default setting if no custom numbers
-        from_page = page_max(page)
-
-    if "reactor.cc/search" in page:  # if search
-        if "q=&" in page:
-            page = page.replace("q=&", "")
-        if "user=&" in page:
-            page = page.replace("user=&", "")
-        sl = page.split("search", 2)
-        search = True
-    else:
-        search = False
-
-    # сразу извиняюсь, на этом проекте я учился использовать bs4(я не читал док)
-
-    rating = []
-    date = []
-    bestcomments = []
-    lencomments = []
-    keys = []
-    txt = []
-    images = []
-    tags = []
-
-    # print(len(images),len(tags), len(rating),len(date),len(lencomments))
+    base = dict()
+    if upd == dict:
+        base = upd
 
     while not from_page == until_page:
-        if search:
-            page_ind = sl[0] + "search/+/" + str(from_page) + sl[1]
-        else:
-            page_ind = page + "/" + str(from_page)
 
-            sys.stdout.write("<< pages left: " + str(from_page - until_page) + " >>\0\r")
-        soup = bs(getpage(page_ind).content, "html.parser")
+        try:
+            sys.stdout.write("left: " + str(from_page) + "\0\r")
+            q = parse_page(page + "/" + str(from_page), base)
 
-        temptext = []
-        tempdate = []
-        temprating = []
-        tempkey = []
-        temptags = []
-        templencom = []
-        tempbestcom = []
+                
+            q &= m
+            if 0 > q:
+                sys.stderr.write("Exit value: " + str(q))
+                raise Exception
 
-        # block selection
-        for i in soup.select(".article.post-normal"):
-
-            datatext = []
-            # парс текста в посте если он имеется
-            for io in i.select(".post_content > div"):
-                if io.text:
-                    datatext.append(io.text)
-
-                    # лучший коммент (если он есть) тексты + имя юзеров  и тд + прикрепленные пикчи и аватары
-                tempbestcom.append(getelmlist(i, '.post_comment_list > div > div'))
-
-            temptags.append(getelmlist(i, ".post_top > .taglist > b > a"))
-            # рейтинг поста
-
-            for ay in i.select(".ufoot > div > .post_rating > span"):
-                # creating dict with tags
-                try:
-                    temprating.append(float(ay.text))
-                except ValueError as e:
-                    sys.stderr.write("<<!>>connect to VPN<<!>>\n")
-                    input("><to reconnect type anything><")
-
-                    # try again
-                    return parser(page, from_page, until_page, update_parsed_array)
-                    # exit()
-
-            # дата  день год месяц точное время
-            tempdate.append(getelmlist(i, ".ufoot > div > .date > span > span"))
-
-            # ссылка на пост
-            for ay in i.select(".ufoot > div > .link_wr > a"):
-                tempkey.append(os.path.basename(ay["href"]))
-
-            for ay in i.select('.commentnum.toggleComments'):
-                # creating dict with tags
-
-                templencom.extend((re.findall(r'\d+', ay.text)))
-
-            dataimage = []
-            for i0 in i.select(".post_content"):
-                for i1 in i0.select(".image"):
-                    # "a" - большие изображения которые надо разворачивать + гифки
-                    # "img" - мелкие изображения которые слишком малы что бы разворачивать
-                    for i2 in i1.findAll(["a", "img"][:]):
-                        # парс исзображения
-                        if i2.has_attr("href"):
-                            # decode urlencoded and add to list
-                            dataimage.append(urllib.parse.unquote(i2["href"]))
-
-                            break
-
-                        else:
-                            # если нет достаточно крупного изображения
-                            if i2.has_attr("src"):
-                                # decode urlencoded and add to list
-                                dataimage.append(urllib.parse.unquote(i2["src"]))
-
-                            break
-            images.append(dataimage)
-            temptext.append(datatext)
-        from_page -= 1
-        if upd:
-            for post_number in range(len(tempkey)):
-                if np.uint32(tempkey[post_number]) == update_parsed_array[1][3][0]:
-                    print("<< Found element[0] at ", tempkey[post_number], " >>")
-
-                    len_arr = len(keys)
-                    keys = np.array(keys, dtype=np.uint32)
-                    indices = np.empty(len_arr, dtype=np.uint32)
-                    end_index = uni(keys, len_arr, indices)
-                    indices = indices[:end_index]
-
-                    if len(keys) == 0:
-                        print("<< No updates found >>")
-                        return None
-                    else:
-                        sys.stdout.write("\n")
-                        return np.append(np.array(images, dtype=object)[indices], update_parsed_array[0]), \
-                               [np.append(np.array(tags, dtype=object)[indices], update_parsed_array[1][0]),
-                                np.append(np.array(rating, dtype=np.float32)[indices], update_parsed_array[1][1]),
-                                np.append(np.array(date, dtype=object)[indices], update_parsed_array[1][2]),
-                                np.append(keys[indices], update_parsed_array[1][3]),
-                                np.append(np.array(lencomments, dtype=np.uint32)[indices], update_parsed_array[1][4])], \
-                               [np.append(np.array(txt, dtype=object)[indices], update_parsed_array[2][0]),
-                                np.append(np.array(bestcomments, dtype=object)[indices], update_parsed_array[2][1])]
-
-                else:
-                    rating.append(temprating[post_number])
-                    lencomments.append(templencom[post_number])
-                    txt.append(temptext[post_number])
-                    tags.append(temptags[post_number])
-                    bestcomments.append(tempbestcom[post_number])
-                    keys.append(tempkey[post_number])
-                    date.append(tempdate[post_number])
+            
+            if q > 0 and upd:
+                break
+            from_page -= 1
             time.sleep(info_struct.timeout)
 
-        else:
-            rating.extend(temprating)
-            lencomments.extend(templencom)
-            txt.extend(temptext)
-            tags.extend(temptags)
-            bestcomments.extend(tempbestcom)
-            keys.extend(tempkey)
-            date.extend(tempdate)
-            time.sleep(info_struct.timeout)
-
-    keys = np.array(keys, dtype=np.uint32)
-    # избавляемся от дубликатов если они есть
-    # нет не мог использовать словари, патаму шо медленные и numpy one love
-    len_arr = len(keys)
-    indices = np.empty(len_arr, dtype=np.uint32)
-    end_index = uni(keys, len_arr, indices)
-    indices = indices[:end_index]
-
+        except (ConnectionError, ValueError):
+            input("input anything to reconnect\n\r")
+            continue
     sys.stdout.write("\n")
-    return \
-        np.array(images, dtype=object)[indices], \
-        [np.array(tags, dtype=object)[indices],
-
-         np.array(rating, dtype=np.float32)[indices],
-         np.array(date, dtype=object)[indices],
-         keys[indices],
-
-         np.array(lencomments, dtype=np.uint32)[indices]], \
-        [np.array(txt, dtype=object)[indices], np.array(bestcomments, dtype=object)[indices]]
+    if dct:
+        return base
+    else:
+        return to_ndarray(base)
 
 
 def get_val_by_index(value, index):
@@ -331,7 +218,7 @@ def get_val_by_index(value, index):
     return np.array(value, dtype=object)[index]
 
 
-def filer_by_rate_comments(val, rating=0):
+def filter_by_intorfloat(val, rating=0):
     """
     Рейтинг = imfo| Комменты - imfo
 

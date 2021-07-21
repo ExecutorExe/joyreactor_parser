@@ -1,5 +1,8 @@
 from .jp import \
-    getimage, page_max, parser, \
+    np,\
+    mparser,\
+    to_ndarray,\
+    getimage, page_max, parser2, \
     get_rdy, get_val_by_index, \
     except_tag, download_images, \
     votegun, filter_by_tag, \
@@ -7,10 +10,11 @@ from .jp import \
     parse_user_tag_list, \
     save_var, \
     save_var_ovr, search, \
-    filer_by_rate_comments, \
+    filter_by_intorfloat, \
     get_popular_tags,\
     parse_page,\
     getimage,\
     info_struct,\
+    PidorError,\
     __author__,__version__
 
